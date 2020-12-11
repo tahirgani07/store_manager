@@ -1,0 +1,28 @@
+^D:\PROGRAMS\FLUTTERPROJECTS\STORE_MANAGER\BUILD\WINDOWS\CMAKEFILES\C7D0B62A903A62133AA23319E57EF56F\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT="C:\flutter" PROJECT_DIR="D:\Programs\FlutterProjects\store_manager" FLUTTER_ROOT="C:\flutter" FLUTTER_EPHEMERAL_DIR="D:\Programs\FlutterProjects\store_manager\windows\flutter\ephemeral" PROJECT_DIR="D:\Programs\FlutterProjects\store_manager" FLUTTER_TARGET="D:\Programs\FlutterProjects\store_manager\lib\main.dart" DART_DEFINES="flutter.inspector.structuredErrors=true" DART_OBFUSCATION="false" TRACK_WIDGET_CREATION="true" TREE_SHAKE_ICONS="false" PACKAGE_CONFIG="D:\Programs\FlutterProjects\store_manager\.dart_tool\package_config.json" C:/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\PROGRAMS\FLUTTERPROJECTS\STORE_MANAGER\BUILD\WINDOWS\CMAKEFILES\A68F4C4DEDB092342290B82BA8A76C93\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\PROGRAMS\FLUTTERPROJECTS\STORE_MANAGER\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/Programs/FlutterProjects/store_manager/windows -BD:/Programs/FlutterProjects/store_manager/build/windows --check-stamp-file D:/Programs/FlutterProjects/store_manager/build/windows/flutter/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

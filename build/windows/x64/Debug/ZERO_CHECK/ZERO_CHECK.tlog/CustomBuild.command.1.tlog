@@ -1,0 +1,10 @@
+^D:\PROGRAMS\FLUTTERPROJECTS\STORE_MANAGER\BUILD\WINDOWS\CMAKEFILES\EC9FE41847C988C2FD17F7E281034217\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/Programs/FlutterProjects/store_manager/windows -BD:/Programs/FlutterProjects/store_manager/build/windows --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Programs/FlutterProjects/store_manager/build/windows/store_manager.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
