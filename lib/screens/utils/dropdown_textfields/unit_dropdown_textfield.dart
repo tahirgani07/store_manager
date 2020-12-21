@@ -33,6 +33,7 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
   OfflineBillItemsModel _offlineBillItemsModel;
   FocusNode focusNode = FocusNode();
   bool isClicked = false;
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
@@ -118,19 +119,22 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
       },
       child: Container(
         child: isClicked
-            ? TextField(
-                key: _textFieldKey,
-                readOnly: widget.readOnly,
-                autofocus: true,
-                focusNode: focusNode,
-                controller: searchUnitController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  isDense: true,
+            ? CompositedTransformTarget(
+                link: _layerLink,
+                child: TextField(
+                  key: _textFieldKey,
+                  readOnly: widget.readOnly,
+                  autofocus: true,
+                  focusNode: focusNode,
+                  controller: searchUnitController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: _onSearchTextChanged,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) => focusNode.unfocus(),
                 ),
-                onChanged: _onSearchTextChanged,
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => focusNode.unfocus(),
               )
             : ListTile(
                 title: Text(_offlineBillItemsModel
@@ -156,13 +160,18 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
         top: yPosition + height + 10,
         left: xPosition,
         width: width + widget.addWidth,
-        child: Material(
-          elevation: 8.0,
-          child: Container(
-            height: (listLength > 4) ? 4 * height : listLength * height,
-            child: (searchUnitController.text.isNotEmpty)
-                ? _getList(_searchList)
-                : _getList(unitsList),
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, height + 5.0),
+          child: Material(
+            elevation: 8.0,
+            child: Container(
+              height: (listLength > 4) ? 4 * height : listLength * height,
+              child: (searchUnitController.text.isNotEmpty)
+                  ? _getList(_searchList)
+                  : _getList(unitsList),
+            ),
           ),
         ),
       );

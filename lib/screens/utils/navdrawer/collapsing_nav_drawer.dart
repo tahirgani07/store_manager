@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/auth_service.dart';
@@ -6,6 +7,11 @@ import 'package:store_manager/screens/utils/navdrawer/collapsing_list_tile.dart'
 import 'package:store_manager/screens/utils/theme.dart';
 
 class CollapsingNavigationDrawer extends StatefulWidget {
+  final Function(String) onSelectTab;
+
+  const CollapsingNavigationDrawer({Key key, @required this.onSelectTab})
+      : super(key: key);
+
   @override
   _CollapsingNavigationDrawerState createState() =>
       _CollapsingNavigationDrawerState();
@@ -16,7 +22,7 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   bool isCollapsed = false;
   AnimationController _animationController;
   Animation<double> widthAnimation;
-  int currentSelectedIndex = 0;
+  String name;
 
   @override
   void initState() {
@@ -29,76 +35,78 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, widget) => getWidget(context, widget),
-    );
-  }
-
-  Widget getWidget(context, widget) {
     double screenWidth = MediaQuery.of(context).size.width;
-    return Container(
-      width: widthAnimation.value,
-      color: drawerBgColor,
-      child: Column(
-        children: [
-          CollapsingListTile(
-            title: "Tahir Gani",
-            icon: Icons.person,
-            animationController: _animationController,
-          ),
-          RaisedButton(
-            onPressed: () => AuthService().signOut(),
-            child: Text("Sign Out"),
-          ),
-          Divider(height: 40.0, color: Colors.grey),
-          Expanded(
-            child: ListView.separated(
-              separatorBuilder: (context, counter) {
-                return Divider(height: 12.0);
-              },
-              itemBuilder: (context, counter) {
-                return Consumer<NavigationModel>(
-                    builder: (context, data, child) {
-                  return CollapsingListTile(
-                    onTap: () {
-                      data.updateScreenIndex(counter);
-                      if (screenWidth <= desktopWidth) Navigator.pop(context);
-                    },
-                    isSelected: data.getScreenIndex() == counter,
-                    title: navigationItems[counter].title,
-                    icon: navigationItems[counter].icon,
-                    animationController: _animationController,
-                  );
-                });
-              },
-              itemCount: navigationItems.length,
+    name = Provider.of<User>(context).displayName;
+
+    Function(String) onSelectTab = widget.onSelectTab;
+
+    return AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, widget) {
+          return Container(
+            width: widthAnimation.value,
+            color: drawerBgColor,
+            child: Column(
+              children: [
+                CollapsingListTile(
+                  title: "$name",
+                  icon: Icons.person,
+                  animationController: _animationController,
+                ),
+                RaisedButton(
+                  onPressed: () => AuthService().signOut(),
+                  child: Text("Sign Out"),
+                ),
+                Divider(height: 40.0, color: Colors.grey),
+                Expanded(
+                  child: Consumer<NavigationModel>(
+                      builder: (context, navigationModel, _) {
+                    return ListView.separated(
+                      separatorBuilder: (context, counter) {
+                        return Divider(height: 12.0);
+                      },
+                      itemBuilder: (context, counter) {
+                        return CollapsingListTile(
+                          onTap: () {
+                            if (navigationModel.currentScreenIndex == counter)
+                              return;
+                            navigationModel.updateCurrentScreenIndex(counter);
+                            navigationModel.addToStack(counter);
+                            onSelectTab(navigationItems[counter].routeName);
+                          },
+                          isSelected:
+                              navigationModel.currentScreenIndex == counter,
+                          title: navigationItems[counter].title,
+                          icon: navigationItems[counter].icon,
+                          animationController: _animationController,
+                        );
+                      },
+                      itemCount: navigationItems.length,
+                    );
+                  }),
+                ),
+                screenWidth <= desktopWidth
+                    ? SizedBox()
+                    : InkWell(
+                        onTap: () {
+                          setState(() {
+                            isCollapsed = !isCollapsed;
+                            isCollapsed
+                                ? _animationController.forward()
+                                : _animationController.reverse();
+                          });
+                        },
+                        child: AnimatedIcon(
+                          icon: AnimatedIcons.close_menu,
+                          progress: _animationController,
+                          color: Colors.white,
+                          size: 20.0,
+                        ),
+                      ),
+                SizedBox(height: 50),
+              ],
             ),
-          ),
-          screenWidth <= desktopWidth
-              ? SizedBox()
-              : Consumer<NavigationModel>(builder: (context, data, child) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        isCollapsed = !isCollapsed;
-                        isCollapsed
-                            ? _animationController.forward()
-                            : _animationController.reverse();
-                        data.toggleIsCollapsed();
-                      });
-                    },
-                    child: AnimatedIcon(
-                      icon: AnimatedIcons.close_menu,
-                      progress: _animationController,
-                      color: Colors.white,
-                      size: 20.0,
-                    ),
-                  );
-                }),
-          SizedBox(height: 50),
-        ],
-      ),
-    );
+          );
+        });
   }
 }

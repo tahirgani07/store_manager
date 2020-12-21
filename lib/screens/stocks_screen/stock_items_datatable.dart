@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/screens/stocks_screen/stock_screen_alert_dialogs.dart';
+import 'package:store_manager/screens/utils/marquee_widget.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 class StockItemsDataTable extends StatefulWidget {
@@ -103,14 +104,9 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
               onSelectChanged: (b) =>
                   showStockDetailsDialog(context, uid, item),
               cells: [
-                DataCell(
-                  Tooltip(
-                    message: "Test Message",
-                    child: Text("${item.name}"),
-                  ),
-                ),
-                DataCell(Text("${item.stockSold}")),
-                DataCell(Text("${item.remainingStock}")),
+                DataCell(MarqueeWidget(child: Text("${item.name}"))),
+                DataCell(MarqueeWidget(child: Text("${item.stockSold}"))),
+                DataCell(MarqueeWidget(child: Text("${item.remainingStock}"))),
               ],
             ))
         .toList();

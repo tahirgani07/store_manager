@@ -10,7 +10,6 @@ import 'package:store_manager/screens/billing_screen/bill_main_screen.dart';
 import 'package:store_manager/screens/customer_screen/customers_screen.dart';
 import 'package:store_manager/screens/utils/error_screen.dart';
 import 'package:store_manager/screens/stocks_screen/stocks_screen.dart';
-import 'package:store_manager/screens/utils/navdrawer/collapsing_nav_drawer.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,16 +22,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
     bool mediumScreen = screenSize.width <= desktopWidth;
-    String uid = Provider.of<User>(context).uid;
-    uid = uid ?? '';
+    String uid = Provider.of<User>(context).uid ?? "";
 
     return SafeArea(
       child: Scaffold(
         appBar: mediumScreen ? AppBar(title: Text("Stock Manager")) : null,
-        drawer: mediumScreen ? CollapsingNavigationDrawer() : null,
+        // drawer: mediumScreen ? CollapsingNavigationDrawer() : null,
         body: Row(
           children: [
-            mediumScreen ? SizedBox() : CollapsingNavigationDrawer(),
+            // mediumScreen ? SizedBox() : CollapsingNavigationDrawer(),
             Consumer<NavigationModel>(
               builder: (context, data, child) {
                 return Expanded(
@@ -54,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                         value: BillModel().fetchBillsDetails(uid),
                       ),
                     ],
-                    child: getScreen(data.getScreenIndex()),
+                    child: Container(),
                   ),
                 );
               },

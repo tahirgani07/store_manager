@@ -35,6 +35,7 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
   bool isClicked = false;
   OfflineBillItemsModel _offlineBillItemsModel;
   OfflineBillItem currentOfflineBillItem;
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
@@ -95,17 +96,20 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
       },
       child: Container(
         child: (isClicked)
-            ? TextField(
-                key: _textFieldKey,
-                focusNode: focusNode,
-                controller: nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  isDense: true,
+            ? CompositedTransformTarget(
+                link: _layerLink,
+                child: TextField(
+                  key: _textFieldKey,
+                  focusNode: focusNode,
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: _onSearchTextChanged,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) => focusNode.unfocus(),
                 ),
-                onChanged: _onSearchTextChanged,
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => focusNode.unfocus(),
               )
             : ListTile(
                 title: Text(currentOfflineBillItem.name),
@@ -132,13 +136,18 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
           top: yPosition + height + 10,
           left: xPosition,
           width: width + widget.addWidth,
-          child: Material(
-            elevation: 8.0,
-            child: Container(
-              height: (listLength > 4) ? 4 * height : listLength * height,
-              child: (nameController.text.isNotEmpty)
-                  ? _getList(_searchList)
-                  : _getList(widget.itemsList),
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(0.0, height + 5.0),
+            child: Material(
+              elevation: 8.0,
+              child: Container(
+                height: (listLength > 4) ? 4 * height : listLength * height,
+                child: (nameController.text.isNotEmpty)
+                    ? _getList(_searchList)
+                    : _getList(widget.itemsList),
+              ),
             ),
           ),
         );

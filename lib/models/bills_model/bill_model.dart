@@ -35,6 +35,8 @@ class BillModel extends ChangeNotifier {
         taxAmt: doc['taxAmt'],
         discountAmt: doc['discountAmt'],
         finalAmt: doc['finalAmt'],
+        amtPaid: doc['amtPaid'],
+        amtBalance: doc['amtBalance'],
       );
     }).toList();
   }
@@ -63,13 +65,15 @@ class BillModel extends ChangeNotifier {
 
   Future addBill({
     @required String uid,
-    String customerId,
-    String customerName,
+    String customerId = "",
+    String customerName = "",
     List<BillItem> billItemsList,
-    double grossAmt,
-    double taxAmt,
-    double discountAmt,
-    double finalAmt,
+    double grossAmt = 0,
+    double taxAmt = 0,
+    double discountAmt = 0,
+    double finalAmt = 0,
+    double amtPaid = 0,
+    double amtBalance = 0,
   }) async {
     String creationDate = DateTime.now().millisecondsSinceEpoch.toString();
     DatabaseService databaseService = DatabaseService();
@@ -81,6 +85,8 @@ class BillModel extends ChangeNotifier {
       'discountAmt': discountAmt,
       'finalAmt': finalAmt,
       'invoiceDate': creationDate,
+      'amtPaid': amtPaid,
+      'amtBalance': amtBalance,
     }).catchError((e) => print(e.toString()));
 
     final billItemsCollectionRef = databaseService
@@ -107,6 +113,8 @@ class Bill {
   final double taxAmt;
   final double discountAmt;
   final double finalAmt;
+  final double amtPaid;
+  final double amtBalance;
 
   Bill({
     this.customerId,
@@ -118,6 +126,8 @@ class Bill {
     this.taxAmt,
     this.discountAmt,
     this.finalAmt,
+    this.amtPaid,
+    this.amtBalance,
   });
 }
 

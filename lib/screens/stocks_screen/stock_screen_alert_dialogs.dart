@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/models/stocks_model/stock_trans_model.dart';
 import 'package:store_manager/models/unit_model.dart';
@@ -132,12 +133,27 @@ Future<void> showStockDetailsDialog(
       return AlertDialog(
         title: Text('${item.name}'),
         content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Unit - ${item.unit}'),
-              Text('Price Per ${item.unit} - ${item.pricePerUnit}'),
-              Text('Remaining Stock - ${item.remainingStock}'),
-              Text('Stock Sold- ${item.stockSold}'),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Unit - ${item.unit}'),
+                  Text('Price Per ${item.unit} - ${item.pricePerUnit}'),
+                  Text('Remaining Stock - ${item.remainingStock}'),
+                  Text('Stock Sold- ${item.stockSold}'),
+                ],
+              ),
+              SizedBox(
+                width: 20,
+              ),
+              Container(
+                height: 100,
+                width: 100,
+                child: QrImage(
+                  data: item.creationDate,
+                ),
+              ),
             ],
           ),
         ),

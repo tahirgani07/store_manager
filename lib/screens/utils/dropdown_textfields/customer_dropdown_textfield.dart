@@ -29,6 +29,7 @@ class _DropDownTextFieldState extends State<CustomerDropDownTextField> {
   FocusNode _focusNode = new FocusNode();
   List<Customer> _searchList = [];
   String uid;
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
@@ -48,16 +49,19 @@ class _DropDownTextFieldState extends State<CustomerDropDownTextField> {
   @override
   Widget build(BuildContext context) {
     uid = Provider.of<User>(context).uid;
-    return TextField(
-      key: _textFieldKey,
-      focusNode: _focusNode,
-      controller: widget.controller,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: widget.labelText ?? "",
-        isDense: true,
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: TextField(
+        key: _textFieldKey,
+        focusNode: _focusNode,
+        controller: widget.controller,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: widget.labelText ?? "",
+          isDense: true,
+        ),
+        onChanged: _onSearchTextChanged,
       ),
-      onChanged: _onSearchTextChanged,
     );
   }
 
@@ -78,13 +82,18 @@ class _DropDownTextFieldState extends State<CustomerDropDownTextField> {
         top: yPosition + height + 10,
         left: xPosition,
         width: width + widget.addWidth,
-        child: Material(
-          elevation: 8.0,
-          child: Container(
-            height: (listLength > 4) ? 4 * height : listLength * height,
-            child: (widget.controller.text.isNotEmpty)
-                ? _getList(_searchList)
-                : _getList(widget.customersList),
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, height + 5.0),
+          child: Material(
+            elevation: 8.0,
+            child: Container(
+              height: (listLength > 4) ? 4 * height : listLength * height,
+              child: (widget.controller.text.isNotEmpty)
+                  ? _getList(_searchList)
+                  : _getList(widget.customersList),
+            ),
           ),
         ),
       );

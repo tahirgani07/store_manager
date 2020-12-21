@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:store_manager/screens/utils/marquee_widget.dart';
 
 TextStyle listTileDefaultTextStyle = TextStyle(
     color: Colors.white70, fontSize: 15.0, fontWeight: FontWeight.w600);
@@ -169,13 +170,14 @@ class DecimalTextInputFormatter extends TextInputFormatter {
 Widget getFlexContainer(
   String title,
   int flex, {
-  bool border: true,
+  bool border = true,
   color,
-  double height: 50,
+  double height = 50,
   //height should be 57 for heading row
-  Alignment alignment: Alignment.centerLeft,
-  bool textBold: false,
-  bool greyText: false,
+  Alignment alignment = Alignment.centerLeft,
+  bool textBold = false,
+  bool greyText = false,
+  String tooltipMsg = "",
 }) {
   return Flexible(
     flex: flex,
@@ -187,11 +189,13 @@ Widget getFlexContainer(
         border: border ? Border.all(color: Colors.grey) : null,
         color: color,
       ),
-      child: Text(
-        title,
-        style: TextStyle(
-            color: greyText ? Colors.grey.shade600 : null,
-            fontWeight: textBold ? FontWeight.w500 : null),
+      child: MarqueeWidget(
+        child: Text(
+          title,
+          style: TextStyle(
+              color: greyText ? Colors.grey.shade600 : null,
+              fontWeight: textBold ? FontWeight.w500 : null),
+        ),
       ),
     ),
   );

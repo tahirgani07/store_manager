@@ -1,14 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_manager/locator.dart';
 import 'package:store_manager/models/bills_model/bill_model.dart';
-import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
-import 'package:store_manager/models/customer_model/customer_model.dart';
-import 'package:store_manager/models/stocks_model/stock_items_model.dart';
-import 'package:store_manager/screens/billing_screen/billing_screen.dart';
+import 'package:store_manager/models/navigation_model.dart';
+import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/display_bill.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:store_manager/services/navigation_service.dart';
 
 class BillMainScreen extends StatefulWidget {
   @override
@@ -23,7 +23,8 @@ class _BillMainScreenState extends State<BillMainScreen> {
   List<String> filterTransList = [
     "All Sale Invoices",
     "This Month",
-    "This Year"
+    "This Year",
+    "Custom",
   ];
   String filterTransDropdownVal;
 
@@ -32,6 +33,11 @@ class _BillMainScreenState extends State<BillMainScreen> {
 
   TextEditingController searchController;
   bool ranOnce = false;
+  double totAmtPaid;
+  double totAmtBalance;
+  double totAmt;
+
+  NavigationModel navigationModel;
 
   @override
   void initState() {
@@ -60,115 +66,147 @@ class _BillMainScreenState extends State<BillMainScreen> {
   Widget build(BuildContext context) {
     uid = Provider.of<User>(context).uid;
     _fullBillsList = Provider.of<List<Bill>>(context) ?? [];
-    return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(10.0),
-        color: bgColor,
-        child: Column(
-          children: [
-            Material(
-              color: Colors.white,
-              elevation: 8.0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 10.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          child: DropdownButton(
-                              underline: SizedBox(),
-                              icon: Icon(Icons.keyboard_arrow_down),
-                              value: filterTransDropdownVal,
-                              items: filterTransList.map((val) {
-                                return DropdownMenuItem(
-                                  value: val,
-                                  child: Text(val),
-                                );
-                              }).toList(),
-                              onChanged: (String newVal) {
-                                changeDateTextfieldWrtDropdown(newVal);
-                                _onDateTextFieldChanged();
-                                setState(() {
-                                  filterTransDropdownVal = newVal;
-                                });
-                              }),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          height: 32,
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.all(4),
-                          child: Text("Between",
-                              style: TextStyle(color: Colors.white)),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(5),
-                                bottomLeft: Radius.circular(5)),
+    navigationModel = Provider.of<NavigationModel>(context);
+
+    // Set the Paid-Unpaid Containers
+    totAmtPaid = 0;
+    totAmtBalance = 0;
+    totAmt = 0;
+    _datedBillsList.forEach((bill) {
+      totAmtPaid += bill.amtPaid;
+      totAmtBalance += bill.amtBalance;
+    });
+    totAmt = totAmtPaid + totAmtBalance;
+
+    return WillPopScope(
+      onWillPop: () async {
+        int lastIndex = 0;
+        if (navigationModel.indexStack.length > 1) {
+          lastIndex = navigationModel.popFromStack();
+          navigationModel.updateCurrentScreenIndex(lastIndex);
+          return true;
+        } else {
+          navigationModel.resetIndexStack();
+          if (navigationModel.currentScreenIndex != lastIndex) {
+            navigationModel.updateCurrentScreenIndex(lastIndex);
+            locator<NavigationService>().navigateTo(BillTransRoute);
+          }
+          return false;
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          padding: EdgeInsets.all(10.0),
+          color: bgColor,
+          child: Column(
+            children: [
+              Material(
+                color: Colors.white,
+                elevation: 8.0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 10.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            child: DropdownButton(
+                                underline: SizedBox(),
+                                icon: Icon(Icons.keyboard_arrow_down),
+                                value: filterTransDropdownVal,
+                                items: filterTransList.map((val) {
+                                  return DropdownMenuItem(
+                                    value: val,
+                                    child: Text(val),
+                                  );
+                                }).toList(),
+                                onChanged: (String newVal) {
+                                  changeDateTextfieldWrtDropdown(newVal);
+                                  _onDateTextFieldChanged();
+                                  setState(() {
+                                    filterTransDropdownVal = newVal;
+                                  });
+                                }),
                           ),
-                        ),
-                        Container(
-                          height: 32,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.only(
-                              bottomRight: Radius.circular(5),
-                              topRight: Radius.circular(5),
+                          SizedBox(width: 10),
+                          Container(
+                            height: 32,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.all(4),
+                            child: Text("Between",
+                                style: TextStyle(color: Colors.white)),
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(5),
+                                  bottomLeft: Radius.circular(5)),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              _customDatePickerTextField(startDateController),
-                              Text("To", style: TextStyle(fontSize: 12)),
-                              _customDatePickerTextField(endDateController),
-                            ],
+                          Container(
+                            height: 32,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                _customDatePickerTextField(
+                                    "START", startDateController),
+                                Text("To", style: TextStyle(fontSize: 12)),
+                                _customDatePickerTextField(
+                                    "END", endDateController),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 10),
-                        RaisedButton(
-                          color: Colors.redAccent,
-                          textColor: Colors.white,
-                          child: Text("Clear"),
-                          onPressed: () {
-                            startDateController.clear();
-                            endDateController.clear();
-                            filterTransDropdownVal = filterTransList[0];
-                            _onDateTextFieldChanged();
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    Row(
-                      children: [
-                        customContainer(
-                          title: "Paid",
-                          amt: "450",
-                          color: Color(0xffB9F3E7),
-                        ),
-                        Text("+"),
-                        customContainer(
-                          title: "Unpaid",
-                          color: Color(0xffCFE6FE),
-                        ),
-                        Text("="),
-                        customContainer(
-                          title: "Total",
-                          amt: "450",
-                          color: Color(0xffF8C889),
-                        ),
-                      ],
-                    ),
-                  ],
+                          SizedBox(width: 10),
+                          RaisedButton(
+                            color: Colors.redAccent,
+                            textColor: Colors.white,
+                            child: Text("Clear"),
+                            onPressed: () {
+                              startDateController.clear();
+                              endDateController.clear();
+                              filterTransDropdownVal = filterTransList[0];
+                              _onDateTextFieldChanged();
+                            },
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        children: [
+                          customContainer(
+                            title: "Paid",
+                            amt: "$totAmtPaid",
+                            color: Color(0xffB9F3E7),
+                          ),
+                          Text("+"),
+                          customContainer(
+                            title: "Unpaid",
+                            amt: "$totAmtBalance",
+                            color: Color(0xffCFE6FE),
+                          ),
+                          Text("="),
+                          customContainer(
+                            title: "Total",
+                            amt: "$totAmt",
+                            color: Color(0xffF8C889),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 10),
-            _getBillTrans(),
-          ],
+              SizedBox(height: 10),
+              _getBillTrans(),
+            ],
+          ),
         ),
       ),
     );
@@ -197,30 +235,9 @@ class _BillMainScreenState extends State<BillMainScreen> {
                       SizedBox(width: 50),
                       RaisedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MultiProvider(
-                                providers: [
-                                  StreamProvider<List<Customer>>.value(
-                                    value: CustomerModel().fetchCustomers(uid),
-                                  ),
-                                  StreamProvider<List<Bill>>.value(
-                                    value: BillModel().fetchBillsDetails(uid),
-                                  ),
-                                  StreamProvider<List<Items>>.value(
-                                    value: ItemsModel().fetchItems(uid),
-                                  ),
-                                  ChangeNotifierProvider(
-                                    create: (context) => BillModel(),
-                                  ),
-                                  ChangeNotifierProvider(
-                                    create: (context) =>
-                                        OfflineBillItemsModel(),
-                                  ),
-                                ],
-                                child: BillingScreen(),
-                              ),
-                            ),
+                          Navigator.pushNamed(
+                            context,
+                            AddBillRoute,
                           );
                         },
                         child: Text("Add Bill"),
@@ -377,7 +394,8 @@ class _BillMainScreenState extends State<BillMainScreen> {
     );
   }
 
-  Widget _customDatePickerTextField(TextEditingController controller) {
+  Widget _customDatePickerTextField(
+      String type, TextEditingController controller) {
     return Container(
       alignment: Alignment.center,
       width: 120,
@@ -393,23 +411,32 @@ class _BillMainScreenState extends State<BillMainScreen> {
             alignLabelWithHint: true,
           ),
           onTap: () async {
-            DateTime date = await showDatePicker(
-              context: context,
-              initialDate: (controller.text.isNotEmpty)
-                  ? DateTime.fromMillisecondsSinceEpoch(
-                      _getIntDateFromFormattedStringDate(controller.text))
-                  : DateTime.now(),
-              firstDate: DateTime(2020),
-              lastDate: DateTime.now(),
-            );
+            DateTime date = await _getDateFromPopup(type, controller);
             controller.text =
                 date != null ? formatter.format(date) : controller.text;
             _onDateTextFieldChanged();
+            setState(() {
+              filterTransDropdownVal = "Custom";
+            });
           }),
     );
   }
 
-  changeDateTextfieldWrtDropdown(String val) {
+  Future<DateTime> _getDateFromPopup(
+      String type, TextEditingController controller) {
+    return showDatePicker(
+      context: context,
+      helpText: "SELECT ${type.toUpperCase()} DATE",
+      initialDate: (controller.text.isNotEmpty)
+          ? DateTime.fromMillisecondsSinceEpoch(
+              _getIntDateFromFormattedStringDate(controller.text))
+          : DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+  }
+
+  changeDateTextfieldWrtDropdown(String val) async {
     DateTime date = DateTime.now();
     switch (val) {
       case "This Month":
@@ -419,6 +446,12 @@ class _BillMainScreenState extends State<BillMainScreen> {
       case "This Year":
         startDateController.text = "01/01/${date.year}";
         endDateController.text = formatter.format(date);
+        break;
+      case "Custom":
+        DateTime date = await _getDateFromPopup("START", startDateController);
+        startDateController.text =
+            date != null ? formatter.format(date) : startDateController.text;
+        _onDateTextFieldChanged();
         break;
       default:
         startDateController.clear();
