@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store_manager/screens/utils/marquee_widget.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 class CollapsingListTile extends StatefulWidget {
@@ -7,6 +8,8 @@ class CollapsingListTile extends StatefulWidget {
   final AnimationController animationController;
   final bool isSelected;
   final Function onTap;
+  final bool isUsernameTile;
+  final bool isLogoutTile;
 
   CollapsingListTile({
     @required this.title,
@@ -14,6 +17,8 @@ class CollapsingListTile extends StatefulWidget {
     @required this.animationController,
     this.isSelected = false,
     this.onTap,
+    this.isUsernameTile: false,
+    this.isLogoutTile: false,
   });
 
   @override
@@ -21,6 +26,9 @@ class CollapsingListTile extends StatefulWidget {
 }
 
 class _CollapsingListTileState extends State<CollapsingListTile> {
+  Color selectedColor = Color(0xFF669DF6);
+  Color defaultColor = Color(0xFFBCC3CA);
+
   @override
   Widget build(BuildContext context) {
     Animation<double> widthAnimation =
@@ -33,7 +41,7 @@ class _CollapsingListTileState extends State<CollapsingListTile> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(16.0)),
           color: (widget.isSelected)
-              ? Colors.transparent.withOpacity(0.3)
+              ? Colors.white.withOpacity(0.1)
               : Colors.transparent,
         ),
         width: widthAnimation.value,
@@ -44,21 +52,41 @@ class _CollapsingListTileState extends State<CollapsingListTile> {
               ? MainAxisAlignment.start
               : MainAxisAlignment.center,
           children: [
-            Icon(widget.icon,
-                color: (widget.isSelected) ? selectedColor : Colors.white30,
-                size: 20.0),
+            Icon(widget.icon, color: _getColor(), size: 20.0),
             (widthAnimation.value >= naveSizeToHideText)
                 ? SizedBox(width: 10)
                 : SizedBox(),
             (widthAnimation.value >= naveSizeToHideText)
-                ? Text(widget.title,
-                    style: (widget.isSelected)
-                        ? listTileSelectedTextStyle
-                        : listTileDefaultTextStyle)
+                ? widget.isUsernameTile
+                    ? MarqueeWidget(
+                        child: Text(
+                          widget.title,
+                          style: TextStyle(
+                            color: _getColor(),
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        widget.title,
+                        style: TextStyle(
+                          color: _getColor(),
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      )
                 : SizedBox(),
           ],
         ),
       ),
     );
+  }
+
+  Color _getColor() {
+    if (widget.isUsernameTile) return Colors.white;
+    if (widget.isLogoutTile) return Colors.red;
+    if (widget.isSelected) return selectedColor;
+    return defaultColor;
   }
 }

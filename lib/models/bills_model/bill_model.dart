@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:store_manager/models/database_service.dart';
+import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 class BillModel extends ChangeNotifier {
@@ -63,8 +64,9 @@ class BillModel extends ChangeNotifier {
         .map(_convertBillItemsSnapshots);
   }
 
-  Future addBill({
+  Future<bool> addBill({
     @required String uid,
+    String invoiceNo,
     String customerId = "",
     String customerName = "",
     List<BillItem> billItemsList,
@@ -74,12 +76,16 @@ class BillModel extends ChangeNotifier {
     double finalAmt = 0,
     double amtPaid = 0,
     double amtBalance = 0,
+    List<Items> stockItemsToUpdate,
+    List<double> stockItemsQtyToUpdate,
   }) async {
+    bool success = true;
     String creationDate = DateTime.now().millisecondsSinceEpoch.toString();
     DatabaseService databaseService = DatabaseService();
     await databaseService.getRefToBillsCollection(uid).doc(creationDate).set({
       'customerId': customerId,
       'customerName': customerName.capitalizeFirstofEach,
+      'invoiceNo': invoiceNo,
       'grossAmt': grossAmt,
       'taxAmt': taxAmt,
       'discountAmt': discountAmt,
@@ -87,19 +93,40 @@ class BillModel extends ChangeNotifier {
       'invoiceDate': creationDate,
       'amtPaid': amtPaid,
       'amtBalance': amtBalance,
-    }).catchError((e) => print(e.toString()));
+    }).catchError((e) {
+      success = false;
+      print(e.toString());
+    });
 
     final billItemsCollectionRef = databaseService
         .getRefToBillsCollection(uid)
         .doc(creationDate)
-        .collection('items');
+        .collection('billItems');
 
+    int counter = 1;
     for (BillItem i in billItemsList) {
-      await billItemsCollectionRef.doc(i.itemId).set({
-        'itemId': i.itemId,
+      await billItemsCollectionRef.doc(counter.toString()).set({
+        'name': i.name,
         'qty': i.qty,
-      }).catchError((e) => print(e.toString()));
+        'unit': i.unit,
+        'pricePerUnit': i.pricePerUnit,
+        'discount': i.discount,
+        'tax': i.tax,
+        'amt': i.amt,
+      }).catchError((e) {
+        success = false;
+        print(e.toString());
+      });
+      counter++;
     }
+
+    ItemsModel().updateMultipleSoldStockItem(
+      uid: uid,
+      items: stockItemsToUpdate,
+      amtSold: stockItemsQtyToUpdate,
+    );
+
+    return success;
   }
 }
 
@@ -132,8 +159,21 @@ class Bill {
 }
 
 class BillItem {
-  final String itemId;
+  final String name;
   final double qty;
+  final String unit;
+  final double pricePerUnit;
+  final double discount;
+  final double tax;
+  final double amt;
 
-  BillItem({this.itemId, this.qty});
+  BillItem({
+    this.unit,
+    this.pricePerUnit,
+    this.discount,
+    this.tax,
+    this.amt,
+    this.name,
+    this.qty,
+  });
 }

@@ -55,6 +55,28 @@ class ItemsModel {
     );
   }
 
+  Future updateMultipleSoldStockItem({
+    @required String uid,
+    List<Items> items,
+    List<double> amtSold,
+  }) async {
+    bool success = true;
+    DatabaseService databaseService = DatabaseService();
+    for (int i = 0; i < items.length; i++) {
+      await databaseService
+          .getRefToItemsCollection(uid)
+          .doc(items[i].creationDate)
+          .update({
+        'remainingStock': items[i].remainingStock - amtSold[i],
+        'stockSold': items[i].stockSold + amtSold[i],
+      }).catchError((e) {
+        success = false;
+        print(e.toString());
+      });
+    }
+    return success;
+  }
+
   Future addStock({
     @required String uid,
     Items item,

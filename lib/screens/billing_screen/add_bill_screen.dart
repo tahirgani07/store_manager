@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -34,6 +35,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
   BillModel billModel;
   OfflineBillItemsModel _offlineBillItemsModel;
   ScrollController _scrollController;
+  double _totalAmt = 0, _totalDiscount = 0, _totalTax = 0;
 
   @override
   void initState() {
@@ -44,6 +46,11 @@ class _AddBillScreenState extends State<AddBillScreen> {
     _invoiceDateController = TextEditingController(text: currentDateString);
     offlineBillItemsList = [];
     _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Add Initial Items Row
+      _addNewBillItemRow();
+    });
     super.initState();
   }
 
@@ -102,7 +109,31 @@ class _AddBillScreenState extends State<AddBillScreen> {
                     Text("Billing",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold)),
-                    Icon(Icons.calculate_outlined),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(),
+                        Row(
+                          children: [
+                            RaisedButton(
+                              onPressed: () {},
+                              child:
+                                  Text("Share", style: TextStyle(fontSize: 18)),
+                              color: Colors.blue,
+                              textColor: Colors.white,
+                            ),
+                            SizedBox(width: 20.0),
+                            RaisedButton(
+                              onPressed: () async => _addBill(),
+                              child:
+                                  Text("Save", style: TextStyle(fontSize: 18)),
+                              color: Colors.blue,
+                              textColor: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -208,12 +239,6 @@ class _AddBillScreenState extends State<AddBillScreen> {
         color: Colors.grey.shade200,
         child: Column(
           children: [
-            RaisedButton(
-              child: Text("ADD ITEM"),
-              onPressed: () {
-                _addNewBillItemRow();
-              },
-            ),
             itemListHeader(),
             Expanded(
               child: CupertinoScrollbar(
@@ -229,6 +254,10 @@ class _AddBillScreenState extends State<AddBillScreen> {
                       counter: counter,
                       color:
                           (counter % 2 == 0) ? Color(0xffF2F4F8) : Colors.white,
+                      lastRow: counter ==
+                          _offlineBillItemsModel
+                                  .getLengthOfOfflineBillItemsList() -
+                              1,
                     );
                   },
                 ),
@@ -240,14 +269,23 @@ class _AddBillScreenState extends State<AddBillScreen> {
     );
   }
 
-  _getFooter() {
-    double totalAmt = 0;
+  _updateAllTotals() {
+    _totalAmt = 0;
+    _totalDiscount = 0;
+    _totalTax = 0;
     for (int i = 0;
         i < _offlineBillItemsModel.getLengthOfOfflineBillItemsList();
         i++) {
-      totalAmt += _offlineBillItemsModel.getOfflineBillItem(i).amt;
+      OfflineBillItem current = _offlineBillItemsModel.getOfflineBillItem(i);
+      _totalAmt += current.amt;
+      _totalTax += current.tax;
+      _totalDiscount += current.discount;
     }
-    _totalAmtCont.text = totalAmt.toStringAsFixed(2);
+  }
+
+  _getFooter() {
+    _updateAllTotals();
+    _totalAmtCont.text = _totalAmt.toStringAsFixed(2);
     return Material(
       elevation: 8.0,
       child: Container(
@@ -261,8 +299,13 @@ class _AddBillScreenState extends State<AddBillScreen> {
         child: Column(
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(flex: 3, child: Container()),
+                Flexible(
+                  flex: 3,
+                  child: _addItemRaisedButton(),
+                ),
                 Flexible(
                   flex: 1,
                   child: Row(
@@ -290,30 +333,6 @@ class _AddBillScreenState extends State<AddBillScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(),
-                Row(
-                  children: [
-                    RaisedButton(
-                      onPressed: () {},
-                      child: Text("Share", style: TextStyle(fontSize: 18)),
-                      color: Colors.blue,
-                      textColor: Colors.white,
-                    ),
-                    SizedBox(width: 20.0),
-                    RaisedButton(
-                      onPressed: () {},
-                      child: Text("Print", style: TextStyle(fontSize: 18)),
-                      color: Colors.blue,
-                      textColor: Colors.white,
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -327,122 +346,141 @@ class _AddBillScreenState extends State<AddBillScreen> {
     });
   }
 
-  _updateTotalAmtTextField() {
-    double totalAmt = 0;
-    for (int i = 0;
-        i < _offlineBillItemsModel.getLengthOfOfflineBillItemsList();
-        i++) {
-      double amt = _offlineBillItemsModel.getOfflineBillItem(i).amt;
-      totalAmt += amt;
-    }
-
-    setState(() {
-      _totalAmtCont.text = totalAmt.toStringAsFixed(2);
-    });
-  }
-
   Widget _getItemsRow({
     int counter,
     Color color,
+    bool lastRow: false,
   }) {
-    return Container(
-      color: color,
-      child: Row(
-        children: [
-          getFlexContainer("${counter + 1}", 1,
-              alignment: Alignment.center, border: false),
-          Flexible(
-            flex: 15,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: Colors.grey),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          color: color,
+          child: Row(
+            children: [
+              getFlexContainer("${counter + 1}", 1,
+                  alignment: Alignment.center, border: false),
+              Flexible(
+                flex: 15,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  padding: EdgeInsets.all(5.0),
+                  child: BillItemNameDropDownTextField(
+                    itemsList: itemsList,
+                    counter: counter,
+                  ),
                 ),
               ),
-              padding: EdgeInsets.all(5.0),
-              child: BillItemNameDropDownTextField(
-                itemsList: itemsList,
-                counter: counter,
+              Flexible(
+                flex: 3,
+                child: ContainerToTextField(
+                  counter: counter,
+                  leftBorder: true,
+                  numeric: true,
+                  type: ContainerToTextFieldType.qty,
+                ),
               ),
-            ),
-          ),
-          Flexible(
-            flex: 3,
-            child: ContainerToTextField(
-              counter: counter,
-              leftBorder: true,
-              numeric: true,
-              type: ContainerToTextFieldType.qty,
-            ),
-          ),
-          Flexible(
-            flex: 3,
-            child: Container(
-              padding: EdgeInsets.all(5.0),
-              decoration: BoxDecoration(
-                border: Border(left: BorderSide(color: Colors.grey)),
+              Flexible(
+                flex: 3,
+                child: Container(
+                  padding: EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                    border: Border(left: BorderSide(color: Colors.grey)),
+                  ),
+                  child: UnitDropDownTextField(
+                    counter: counter,
+                    readOnly: billModel.getUnitReadOnlyinBillItem(counter),
+                  ),
+                ),
               ),
-              child: UnitDropDownTextField(
-                counter: counter,
-                readOnly: billModel.getUnitReadOnlyinBillItem(counter),
+              Flexible(
+                flex: 4,
+                child: ContainerToTextField(
+                  counter: counter,
+                  leftBorder: true,
+                  numeric: true,
+                  type: ContainerToTextFieldType.pricePerUnit,
+                ),
               ),
-            ),
+              Flexible(
+                flex: 5,
+                child: ContainerToTextField(
+                  counter: counter,
+                  leftBorder: true,
+                  numeric: true,
+                  type: ContainerToTextFieldType.discount,
+                ),
+              ),
+              Flexible(
+                flex: 6,
+                child: ContainerToTextField(
+                  counter: counter,
+                  leftBorder: true,
+                  numeric: true,
+                  type: ContainerToTextFieldType.tax,
+                ),
+              ),
+              Flexible(
+                flex: 3,
+                child: ContainerToTextField(
+                  counter: counter,
+                  leftBorder: true,
+                  rightBorder: true,
+                  numeric: true,
+                  readOnly: true,
+                  type: ContainerToTextFieldType.amt,
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: IconButton(
+                  icon: Icon(Icons.delete),
+                  iconSize: 18,
+                  splashRadius: 1,
+                  onPressed: () {
+                    setState(() {
+                      _offlineBillItemsModel
+                          .removeFromOfflineBillItemsList(counter);
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
-          Flexible(
-            flex: 4,
-            child: ContainerToTextField(
-              counter: counter,
-              leftBorder: true,
-              numeric: true,
-              type: ContainerToTextFieldType.pricePerUnit,
-            ),
-          ),
-          Flexible(
-            flex: 5,
-            child: ContainerToTextField(
-              counter: counter,
-              leftBorder: true,
-              numeric: true,
-              type: ContainerToTextFieldType.discount,
-            ),
-          ),
-          Flexible(
-            flex: 6,
-            child: ContainerToTextField(
-              counter: counter,
-              leftBorder: true,
-              numeric: true,
-              type: ContainerToTextFieldType.tax,
-            ),
-          ),
-          Flexible(
-            flex: 3,
-            child: ContainerToTextField(
-              counter: counter,
-              leftBorder: true,
-              rightBorder: true,
-              numeric: true,
-              readOnly: true,
-              type: ContainerToTextFieldType.amt,
-            ),
-          ),
-          Flexible(
-            flex: 1,
-            child: IconButton(
-              icon: Icon(Icons.delete),
-              iconSize: 18,
-              splashRadius: 1,
-              onPressed: () {
-                setState(() {
-                  _offlineBillItemsModel
-                      .removeFromOfflineBillItemsList(counter);
-                  _updateTotalAmtTextField();
-                });
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+        !lastRow
+            ? SizedBox()
+            : Container(
+                margin: EdgeInsets.only(left: 50),
+                child: _addItemFlatButton(),
+              )
+      ],
+    );
+  }
+
+  Widget _addItemRaisedButton() {
+    return RaisedButton(
+      child: Text("ADD A ROW"),
+      color: Colors.blue,
+      textColor: Colors.white,
+      onPressed: () {
+        _addNewBillItemRow();
+      },
+    );
+  }
+
+  Widget _addItemFlatButton() {
+    return FlatButton(
+      child: Text("ADD A ROW"),
+      color: Colors.blue,
+      textColor: Colors.white,
+      onPressed: () {
+        _addNewBillItemRow();
+      },
     );
   }
 
@@ -471,5 +509,66 @@ class _AddBillScreenState extends State<AddBillScreen> {
         ),
       ],
     );
+  }
+
+  _addBill() async {
+    double finalAmt = _totalAmt - _totalDiscount + _totalTax;
+    double amtPaid = 0;
+
+    List<OfflineBillItem> offlineBillItemsList =
+        _offlineBillItemsModel.getCompleteList();
+    List<BillItem> billItemsList = [];
+
+    List<Items> stockItemsToUpdate = [];
+    List<double> stockItemsQtyToUpdate = [];
+
+    offlineBillItemsList.forEach((offlineBill) {
+      // Add to billItems List to pass to the addBill method.
+      billItemsList.add(
+        BillItem(
+          name: offlineBill.name,
+          qty: offlineBill.qty,
+          unit: offlineBill.unit,
+          pricePerUnit: offlineBill.pricePerUnit,
+          discount: offlineBill.discount,
+          tax: offlineBill.tax,
+          amt: offlineBill.amt,
+        ),
+      );
+
+      // Check if the billItem is in the stock so you can update it.
+      for (Items i in itemsList) {
+        if (i.name.toLowerCase() == offlineBill.name.toLowerCase()) {
+          stockItemsToUpdate.add(i);
+          stockItemsQtyToUpdate.add(offlineBill.qty);
+        }
+      }
+    });
+
+    bool successfull = await billModel.addBill(
+      uid: uid,
+      invoiceNo: invoiceNo.toString(),
+      customerId: "",
+      customerName: _custNameController.text,
+      grossAmt: _totalAmt,
+      taxAmt: _totalTax,
+      discountAmt: _totalDiscount,
+      finalAmt: finalAmt,
+      amtPaid: amtPaid,
+      amtBalance: finalAmt - amtPaid,
+      billItemsList: billItemsList,
+      stockItemsToUpdate: stockItemsToUpdate,
+      stockItemsQtyToUpdate: stockItemsQtyToUpdate,
+    );
+
+    if (successfull) {
+      Navigator.pop(context);
+    } else {
+      Flushbar(
+        title: "Something Went Wrong",
+        message: "Could Not Add The Bill. Please Try Again.",
+        duration: Duration(seconds: 3),
+      )..show(context);
+    }
   }
 }

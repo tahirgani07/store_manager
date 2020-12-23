@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
             title: 'Store Manager',
             theme: ThemeData(
               primarySwatch: Colors.blue,
+              fontFamily: 'Nunito',
             ),
             builder: (context, child) {
               if (loggedIn) return LayoutTemplate(child: child);

@@ -26,6 +26,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
   void initState() {
     searchController = TextEditingController();
     _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationModel = Provider.of<NavigationModel>(context, listen: false);
+      int index = 2;
+      navigationModel.updateCurrentScreenIndex(index);
+      navigationModel.addToStack(index);
+    });
     super.initState();
   }
 
@@ -40,7 +46,6 @@ class _CustomersScreenState extends State<CustomersScreen> {
   Widget build(BuildContext context) {
     _customersList = Provider.of<List<Customer>>(context) ?? [];
     String uid = Provider.of<User>(context).uid ?? "";
-    navigationModel = Provider.of<NavigationModel>(context);
     return WillPopScope(
       onWillPop: () async {
         int lastIndex = 0;

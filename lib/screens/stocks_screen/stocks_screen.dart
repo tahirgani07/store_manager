@@ -14,45 +14,49 @@ class StocksScreen extends StatefulWidget {
 }
 
 class _StocksScreenState extends State<StocksScreen> {
+  NavigationModel navigationModel;
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationModel = Provider.of<NavigationModel>(context, listen: false);
+      int index = 1;
+      navigationModel.updateCurrentScreenIndex(index);
+      navigationModel.addToStack(index);
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // print(navigationModel.getIndexStack());
-    return Consumer<NavigationModel>(builder: (context, navigationModel, _) {
-      return WillPopScope(
-        onWillPop: () async {
-          int lastIndex = 0;
-          if (navigationModel.indexStack.length > 1) {
-            lastIndex = navigationModel.popFromStack();
+    return WillPopScope(
+      onWillPop: () async {
+        int lastIndex = 0;
+        if (navigationModel.indexStack.length > 1) {
+          lastIndex = navigationModel.popFromStack();
+          navigationModel.updateCurrentScreenIndex(lastIndex);
+          return true;
+        } else {
+          navigationModel.resetIndexStack();
+          if (navigationModel.currentScreenIndex != lastIndex) {
             navigationModel.updateCurrentScreenIndex(lastIndex);
-            return true;
-          } else {
-            navigationModel.resetIndexStack();
-            if (navigationModel.currentScreenIndex != lastIndex) {
-              navigationModel.updateCurrentScreenIndex(lastIndex);
-              return locator<NavigationService>().navigateTo(BillTransRoute);
-            }
-            return false;
+            return locator<NavigationService>().navigateTo(BillTransRoute);
           }
-        },
-        child: Container(
-          color: bgColor,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(flex: 4, child: StockItemsDataTable()),
-              Flexible(
-                flex: 6,
-                child: StockTransList(),
-              ),
-            ],
-          ),
+          return false;
+        }
+      },
+      child: Container(
+        color: bgColor,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(flex: 4, child: StockItemsDataTable()),
+            Flexible(
+              flex: 6,
+              child: StockTransList(),
+            ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 }

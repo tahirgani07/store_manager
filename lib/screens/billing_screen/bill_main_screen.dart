@@ -45,6 +45,13 @@ class _BillMainScreenState extends State<BillMainScreen> {
     startDateController = TextEditingController();
     endDateController = TextEditingController();
     searchController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationModel = Provider.of<NavigationModel>(context, listen: false);
+      int index = 0;
+      navigationModel.updateCurrentScreenIndex(index);
+
+      navigationModel.addToStack(index);
+    });
     super.initState();
   }
 
@@ -66,7 +73,6 @@ class _BillMainScreenState extends State<BillMainScreen> {
   Widget build(BuildContext context) {
     uid = Provider.of<User>(context).uid;
     _fullBillsList = Provider.of<List<Bill>>(context) ?? [];
-    navigationModel = Provider.of<NavigationModel>(context);
 
     // Set the Paid-Unpaid Containers
     totAmtPaid = 0;
@@ -288,6 +294,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
         return InkWell(
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
+              settings: RouteSettings(name: '/display_bill'),
               builder: (context) => DisplayBill(
                 billId: reqList[counter].invoiceDate,
               ),

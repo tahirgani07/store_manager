@@ -19,6 +19,8 @@ class OfflineBillItemsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<OfflineBillItem> getCompleteList() => _offlineBillItemsList;
+
   void addToOfflineBillItemsList(OfflineBillItem offlineBillItem) {
     _offlineBillItemsList.add(offlineBillItem);
     notifyListeners();

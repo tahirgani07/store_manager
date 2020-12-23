@@ -24,7 +24,7 @@ class _DisplayBillState extends State<DisplayBill> {
     billItemsCollectionStream = databaseService
         .getRefToBillsCollection(uid)
         .doc(widget.billId)
-        .collection("items")
+        .collection("billItems")
         .snapshots();
 
     return Scaffold(
@@ -37,7 +37,7 @@ class _DisplayBillState extends State<DisplayBill> {
           return ListView(
             children: snapshot.data.docs.map((doc) {
               return ListTile(
-                title: Text(doc["itemId"]),
+                title: Text(doc["name"]),
                 subtitle: Text(doc["qty"].toString()),
               );
             }).toList(),

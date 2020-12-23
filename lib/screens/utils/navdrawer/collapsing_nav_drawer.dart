@@ -23,6 +23,7 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   AnimationController _animationController;
   Animation<double> widthAnimation;
   String name;
+  Color drawerBgColor = Color(0xFF051E34);
 
   @override
   void initState() {
@@ -35,7 +36,6 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     name = Provider.of<User>(context).displayName;
 
     Function(String) onSelectTab = widget.onSelectTab;
@@ -49,15 +49,12 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
             child: Column(
               children: [
                 CollapsingListTile(
+                  isUsernameTile: true,
                   title: "$name",
                   icon: Icons.person,
                   animationController: _animationController,
                 ),
-                RaisedButton(
-                  onPressed: () => AuthService().signOut(),
-                  child: Text("Sign Out"),
-                ),
-                Divider(height: 40.0, color: Colors.grey),
+                Divider(height: 50, color: Colors.white70, thickness: 0.3),
                 Expanded(
                   child: Consumer<NavigationModel>(
                       builder: (context, navigationModel, _) {
@@ -70,8 +67,8 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                           onTap: () {
                             if (navigationModel.currentScreenIndex == counter)
                               return;
-                            navigationModel.updateCurrentScreenIndex(counter);
-                            navigationModel.addToStack(counter);
+                            // navigationModel.updateCurrentScreenIndex(counter);
+                            // navigationModel.addToStack(counter);
                             onSelectTab(navigationItems[counter].routeName);
                           },
                           isSelected:
@@ -85,25 +82,36 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                     );
                   }),
                 ),
-                screenWidth <= desktopWidth
-                    ? SizedBox()
-                    : InkWell(
-                        onTap: () {
-                          setState(() {
-                            isCollapsed = !isCollapsed;
-                            isCollapsed
-                                ? _animationController.forward()
-                                : _animationController.reverse();
-                          });
-                        },
-                        child: AnimatedIcon(
-                          icon: AnimatedIcons.close_menu,
-                          progress: _animationController,
-                          color: Colors.white,
-                          size: 20.0,
-                        ),
-                      ),
-                SizedBox(height: 50),
+                Divider(height: 20, color: Colors.white70, thickness: 0.3),
+                CollapsingListTile(
+                  isLogoutTile: true,
+                  title: "Sign Out",
+                  icon: Icons.logout,
+                  onTap: () => AuthService().signOut(),
+                  animationController: _animationController,
+                ),
+                Divider(height: 20, color: Colors.white70, thickness: 0.3),
+                Container(
+                  padding: EdgeInsets.only(right: 25),
+                  alignment: Alignment.centerRight,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        isCollapsed = !isCollapsed;
+                        isCollapsed
+                            ? _animationController.forward()
+                            : _animationController.reverse();
+                      });
+                    },
+                    child: AnimatedIcon(
+                      icon: AnimatedIcons.arrow_menu,
+                      progress: _animationController,
+                      color: Colors.white,
+                      size: 20.0,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
               ],
             ),
           );

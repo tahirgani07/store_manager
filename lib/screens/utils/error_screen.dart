@@ -14,9 +14,18 @@ class _ErrorScreenState extends State<ErrorScreen> {
   NavigationModel navigationModel;
 
   @override
-  Widget build(BuildContext context) {
-    navigationModel = Provider.of<NavigationModel>(context);
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationModel = Provider.of<NavigationModel>(context, listen: false);
+      int index = 3;
+      navigationModel.updateCurrentScreenIndex(index);
+      navigationModel.addToStack(index);
+    });
+    super.initState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         int lastIndex = 0;
