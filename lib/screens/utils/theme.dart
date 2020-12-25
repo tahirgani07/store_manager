@@ -121,7 +121,6 @@ Widget getFlexContainer(
   Alignment alignment = Alignment.centerLeft,
   bool textBold = false,
   bool greyText = false,
-  String tooltipMsg = "",
 }) {
   return Flexible(
     flex: flex,
@@ -137,8 +136,9 @@ Widget getFlexContainer(
         child: Text(
           title,
           style: TextStyle(
-              color: greyText ? Colors.grey.shade600 : null,
-              fontWeight: textBold ? FontWeight.w500 : null),
+            color: greyText ? Colors.grey.shade600 : null,
+            fontWeight: textBold ? FontWeight.w500 : null,
+          ),
         ),
       ),
     ),

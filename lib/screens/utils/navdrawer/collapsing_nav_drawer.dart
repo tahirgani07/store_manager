@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/auth_service.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/screens/utils/navdrawer/collapsing_list_tile.dart';
@@ -37,6 +38,7 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   @override
   Widget build(BuildContext context) {
     name = Provider.of<User>(context).displayName;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     Function(String) onSelectTab = widget.onSelectTab;
 
@@ -91,25 +93,32 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                   animationController: _animationController,
                 ),
                 Divider(height: 20, color: Colors.white70, thickness: 0.3),
-                Container(
-                  padding: EdgeInsets.only(right: 25),
-                  alignment: Alignment.centerRight,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        isCollapsed = !isCollapsed;
-                        isCollapsed
-                            ? _animationController.forward()
-                            : _animationController.reverse();
-                      });
-                    },
-                    child: AnimatedIcon(
-                      icon: AnimatedIcons.arrow_menu,
-                      progress: _animationController,
-                      color: Colors.white,
-                      size: 20.0,
-                    ),
-                  ),
+                ResponsiveBuilder(
+                  builder: (context, sizeInfo) {
+                    if (sizeInfo.isDesktop) {
+                      return Container(
+                        padding: EdgeInsets.only(right: 25),
+                        alignment: Alignment.centerRight,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isCollapsed = !isCollapsed;
+                              isCollapsed
+                                  ? _animationController.forward()
+                                  : _animationController.reverse();
+                            });
+                          },
+                          child: AnimatedIcon(
+                            icon: AnimatedIcons.arrow_menu,
+                            progress: _animationController,
+                            color: Colors.white,
+                            size: 20.0,
+                          ),
+                        ),
+                      );
+                    } else
+                      return SizedBox();
+                  },
                 ),
                 SizedBox(height: 20),
               ],

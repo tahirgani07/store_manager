@@ -1,11 +1,18 @@
+import 'dart:html';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/locator.dart';
 import 'package:store_manager/models/bills_model/bill_model.dart';
+import 'package:store_manager/models/database_service.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/display_bill.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
+import 'package:store_manager/screens/utils/marquee_widget.dart';
+import 'package:store_manager/screens/utils/pdf_functions.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:store_manager/services/navigation_service.dart';
@@ -100,118 +107,138 @@ class _BillMainScreenState extends State<BillMainScreen> {
           return false;
         }
       },
-      child: Scaffold(
-        body: Container(
-          padding: EdgeInsets.all(10.0),
-          color: bgColor,
-          child: Column(
-            children: [
-              Material(
-                color: Colors.white,
-                elevation: 8.0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 10.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            child: DropdownButton(
-                                underline: SizedBox(),
-                                icon: Icon(Icons.keyboard_arrow_down),
-                                value: filterTransDropdownVal,
-                                items: filterTransList.map((val) {
-                                  return DropdownMenuItem(
-                                    value: val,
-                                    child: Text(val),
-                                  );
-                                }).toList(),
-                                onChanged: (String newVal) {
-                                  changeDateTextfieldWrtDropdown(newVal);
-                                  _onDateTextFieldChanged();
-                                  setState(() {
-                                    filterTransDropdownVal = newVal;
-                                  });
-                                }),
-                          ),
-                          SizedBox(width: 10),
-                          Container(
-                            height: 32,
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.all(4),
-                            child: Text("Between",
-                                style: TextStyle(color: Colors.white)),
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(5),
-                                  bottomLeft: Radius.circular(5)),
+      child: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: Scaffold(
+          body: Container(
+            padding: EdgeInsets.all(10.0),
+            color: bgColor,
+            child: Column(
+              children: [
+                Material(
+                  color: Colors.white,
+                  elevation: 8.0,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 10.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              child: DropdownButton(
+                                  underline: SizedBox(),
+                                  icon: Icon(Icons.keyboard_arrow_down),
+                                  value: filterTransDropdownVal,
+                                  items: filterTransList.map((val) {
+                                    return DropdownMenuItem(
+                                      value: val,
+                                      child: Text(
+                                        val,
+                                        style: CustomTextStyle.blue_bold_big,
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String newVal) {
+                                    changeDateTextfieldWrtDropdown(newVal);
+                                    _onDateTextFieldChanged();
+                                    setState(() {
+                                      filterTransDropdownVal = newVal;
+                                    });
+                                  }),
                             ),
-                          ),
-                          Container(
-                            height: 32,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(5),
-                                topRight: Radius.circular(5),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 32,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.all(4),
+                              child: Text("Between",
+                                  style: TextStyle(color: Colors.white)),
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(5),
+                                    bottomLeft: Radius.circular(5)),
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                _customDatePickerTextField(
-                                    "START", startDateController),
-                                Text("To", style: TextStyle(fontSize: 12)),
-                                _customDatePickerTextField(
-                                    "END", endDateController),
-                              ],
+                            Container(
+                              height: 32,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(5),
+                                  topRight: Radius.circular(5),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  _customDatePickerTextField(
+                                      "START", startDateController),
+                                  Text("To", style: TextStyle(fontSize: 12)),
+                                  _customDatePickerTextField(
+                                      "END", endDateController),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10),
-                          RaisedButton(
-                            color: Colors.redAccent,
-                            textColor: Colors.white,
-                            child: Text("Clear"),
-                            onPressed: () {
-                              startDateController.clear();
-                              endDateController.clear();
-                              filterTransDropdownVal = filterTransList[0];
-                              _onDateTextFieldChanged();
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 15),
-                      Row(
-                        children: [
-                          customContainer(
-                            title: "Paid",
-                            amt: "$totAmtPaid",
-                            color: Color(0xffB9F3E7),
-                          ),
-                          Text("+"),
-                          customContainer(
-                            title: "Unpaid",
-                            amt: "$totAmtBalance",
-                            color: Color(0xffCFE6FE),
-                          ),
-                          Text("="),
-                          customContainer(
-                            title: "Total",
-                            amt: "$totAmt",
-                            color: Color(0xffF8C889),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 10),
+                            RaisedButton(
+                              color: Colors.redAccent,
+                              textColor: Colors.white,
+                              child: Text("Clear"),
+                              onPressed: () {
+                                startDateController.clear();
+                                endDateController.clear();
+                                filterTransDropdownVal = filterTransList[0];
+                                _onDateTextFieldChanged();
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15),
+                        Row(
+                          children: [
+                            customContainer(
+                              title: "Paid",
+                              amt: totAmtPaid.toStringAsFixed(2),
+                              color: Color(0xffB9F3E7),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text("+", style: CustomTextStyle.bigIcons),
+                            ),
+                            customContainer(
+                              title: "Unpaid",
+                              amt: totAmtBalance.toStringAsFixed(2),
+                              color: Color(0xffCFE6FE),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text("=", style: CustomTextStyle.bigIcons),
+                            ),
+                            customContainer(
+                              title: "Total",
+                              amt: totAmt.toStringAsFixed(2),
+                              color: Color(0xffF8C889),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              _getBillTrans(),
-            ],
+                SizedBox(height: 10),
+                _getBillTrans(),
+              ],
+            ),
           ),
         ),
       ),
@@ -230,7 +257,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("TRANSACTIONS"),
+                  Text("TRANSACTIONS", style: CustomTextStyle.blue_bold_med),
                   SizedBox(height: 15),
                   Row(
                     children: [
@@ -239,15 +266,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
                         child: _getSearchBar(_onSearchTextChanged),
                       ),
                       SizedBox(width: 50),
-                      RaisedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            AddBillRoute,
-                          );
-                        },
-                        child: Text("Add Bill"),
-                      ),
+                      _addBillButton(),
                     ],
                   ),
                 ],
@@ -273,16 +292,55 @@ class _BillMainScreenState extends State<BillMainScreen> {
     );
   }
 
+  _addBillButton() {
+    return RaisedButton(
+      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+      shape: RoundedRectangleBorder(
+        borderRadius: new BorderRadius.circular(30.0),
+      ),
+      onPressed: () => Navigator.pushNamed(context, AddBillRoute),
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.blue,
+            child: Icon(Icons.add, size: 18),
+          ),
+          SizedBox(width: 8),
+          Text("Add Bill"),
+        ],
+      ),
+    );
+  }
+
   _getHeadingRow() {
     return Row(
       children: [
-        getFlexContainer("DATE", 2, textBold: true, greyText: true),
-        getFlexContainer("INVOICE NO", 2, textBold: true, greyText: true),
-        getFlexContainer("CUSTOMER NAME", 4, textBold: true, greyText: true),
-        getFlexContainer("PAYMENT TYPE", 3, textBold: true, greyText: true),
-        getFlexContainer("AMOUNT", 2, textBold: true, greyText: true),
-        getFlexContainer("BALANCE DUE", 2, textBold: true, greyText: true),
-        getFlexContainer("", 2, textBold: true, greyText: true),
+        _getFlexContainer("DATE", 2, header: true),
+        _getFlexContainer(
+          "INVOICE NO",
+          2,
+          header: true,
+          alignment: Alignment.center,
+        ),
+        _getFlexContainer("CUSTOMER NAME", 5, header: true),
+        _getFlexContainer("PAYMENT TYPE", 2, header: true),
+        _getFlexContainer(
+          "AMOUNT",
+          3,
+          header: true,
+          alignment: Alignment.center,
+        ),
+        _getFlexContainer(
+          "BALANCE DUE",
+          2,
+          header: true,
+          alignment: Alignment.center,
+        ),
+        _getFlexContainer("", 2, header: true),
       ],
     );
   }
@@ -292,33 +350,157 @@ class _BillMainScreenState extends State<BillMainScreen> {
       itemCount: reqList.length,
       itemBuilder: (context, counter) {
         return InkWell(
-          onTap: () {
+          onTap: () async {
+            List<BillItem> reqBillItemsList =
+                await _getBillItemsList(reqList[counter].invoiceDate);
+
             Navigator.of(context).push(MaterialPageRoute(
               settings: RouteSettings(name: '/display_bill'),
               builder: (context) => DisplayBill(
-                billId: reqList[counter].invoiceDate,
+                billItemsList: reqBillItemsList,
               ),
             ));
           },
           child: Row(
             children: [
-              getFlexContainer(
+              _getFlexContainer(
                   formatter.format(DateTime.fromMillisecondsSinceEpoch(
                       int.parse(reqList[counter].invoiceDate))),
                   2),
-              getFlexContainer(reqList[counter].invoiceNo, 2,
+              _getFlexContainer(reqList[counter].invoiceNo, 2,
                   alignment: Alignment.centerRight),
-              getFlexContainer(reqList[counter].customerName, 4),
-              getFlexContainer("paymentType", 3),
-              getFlexContainer(reqList[counter].finalAmt.toString(), 2,
+              _getFlexContainer(reqList[counter].customerName, 5),
+              _getFlexContainer("paymentType", 2),
+              _getFlexContainer(
+                  "₹ ${reqList[counter].finalAmt.toStringAsFixed(2)}", 3,
                   alignment: Alignment.centerRight),
-              getFlexContainer("balance due", 2,
+              _getFlexContainer(
+                  "₹ ${reqList[counter].amtBalance.toStringAsFixed(2)}", 2,
                   alignment: Alignment.centerRight),
-              getFlexContainer("For extra btns", 2),
+              _downloadShareBillButtons(flex: 2, bill: reqList[counter]),
             ],
           ),
         );
       },
+    );
+  }
+
+  _downloadShareBillButtons({@required int flex, @required Bill bill}) {
+    return Flexible(
+      flex: flex,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            // Download Pdf Button
+            IconButton(
+              splashRadius: 20,
+              onPressed: () async {
+                PdfFunctions pdfFunctions = await _getPdfFunctionFromBill(bill);
+                pdfFunctions.writeAndSavePdf();
+              },
+              icon: Icon(
+                Icons.download_outlined,
+                color: Colors.grey[600],
+              ),
+            ),
+            // Share Pdf button
+            // IconButton(
+            //   splashRadius: 20,
+            //   onPressed: () async {},
+            //   icon: Icon(
+            //     Icons.share_outlined,
+            //     color: Colors.grey[600],
+            //   ),
+            // ),
+            // Print Pdf Button
+            IconButton(
+              splashRadius: 20,
+              onPressed: () async {
+                PdfFunctions pdfFunctions = await _getPdfFunctionFromBill(bill);
+                pdfFunctions.writeAndPrintPdf();
+              },
+              icon: Icon(
+                Icons.print_outlined,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<PdfFunctions> _getPdfFunctionFromBill(Bill bill) async {
+    List<BillItem> reqBillItemsList = await _getBillItemsList(bill.invoiceDate);
+
+    return PdfFunctions(
+      billItemsList: reqBillItemsList ?? [],
+      invoiceNo: int.parse(bill.invoiceNo),
+      invoiceDate: formatter.format(
+          DateTime.fromMillisecondsSinceEpoch(int.parse(bill.invoiceDate))),
+      customerName: bill.customerName,
+      totalAmt: bill.finalAmt,
+      amtBalance: bill.amtBalance,
+      amtReceived: bill.amtPaid,
+    );
+  }
+
+  Future<List<BillItem>> _getBillItemsList(String invoiceDate) async {
+    DatabaseService databaseService = DatabaseService();
+    QuerySnapshot snapshotOfBillItems = await databaseService
+        .getRefToBillsCollection(uid)
+        .doc(invoiceDate)
+        .collection("billItems")
+        .get();
+
+    List<BillItem> reqBillItemsList =
+        _convertBillItemsSnapshot(snapshotOfBillItems);
+    return reqBillItemsList;
+  }
+
+  List<BillItem> _convertBillItemsSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return BillItem(
+        name: doc["name"],
+        qty: doc["qty"],
+        unit: doc["unit"],
+        pricePerUnit: doc["pricePerUnit"],
+        discount: doc["discount"],
+        tax: doc["tax"],
+        amt: doc["amt"],
+      );
+    }).toList();
+  }
+
+  _getFlexContainer(
+    String title,
+    int flex, {
+    Alignment alignment,
+    bool header = false,
+  }) {
+    return Flexible(
+      flex: flex,
+      child: Container(
+        height: 40,
+        alignment: alignment ?? Alignment.centerLeft,
+        padding: EdgeInsets.symmetric(horizontal: 5.0),
+        decoration: BoxDecoration(
+          border: Border(
+              bottom: (header)
+                  ? BorderSide(color: Colors.grey, width: 0.5)
+                  : BorderSide.none,
+              right: BorderSide(color: Colors.grey, width: 0.5)),
+        ),
+        child: MarqueeWidget(
+          child: Text(
+            title,
+            style: (header)
+                ? CustomTextStyle.grey_bold_small
+                : TextStyle(fontSize: 13),
+          ),
+        ),
+      ),
     );
   }
 
@@ -383,9 +565,8 @@ class _BillMainScreenState extends State<BillMainScreen> {
   Widget customContainer(
       {@required String title, String amt = "0.00", Color color}) {
     return Container(
-      width: 150,
-      height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 10.0),
+      width: 200,
+      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: color,
@@ -394,8 +575,10 @@ class _BillMainScreenState extends State<BillMainScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title),
-          Text("Rs. $amt"),
+          MarqueeWidget(
+              child: Text(title, style: CustomTextStyle.blue_reg_med)),
+          MarqueeWidget(
+              child: Text("₹ $amt", style: CustomTextStyle.blue_bold_big)),
         ],
       ),
     );
@@ -468,9 +651,11 @@ class _BillMainScreenState extends State<BillMainScreen> {
 
   Widget _getSearchBar(Function onSearchTextChanged) {
     return Container(
+      height: 35,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade400),
       ),
+      alignment: Alignment.center,
       child: TextField(
         controller: searchController,
         decoration: InputDecoration(
@@ -482,6 +667,9 @@ class _BillMainScreenState extends State<BillMainScreen> {
             child: Icon(Icons.search, size: 20),
           ),
           prefixIconConstraints: BoxConstraints(maxWidth: 30, maxHeight: 30),
+        ),
+        style: TextStyle(
+          fontSize: 14,
         ),
         onChanged: onSearchTextChanged,
       ),

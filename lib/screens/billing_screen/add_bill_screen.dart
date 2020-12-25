@@ -12,6 +12,8 @@ import 'package:store_manager/screens/utils/container_to_textfield.dart';
 import 'package:store_manager/screens/utils/dropdown_textfields/bill_item_names_dropdown_textfield.dart';
 import 'package:store_manager/screens/utils/dropdown_textfields/customer_dropdown_textfield.dart';
 import 'package:store_manager/screens/utils/dropdown_textfields/unit_dropdown_textfield.dart';
+import 'package:store_manager/screens/utils/loading_screen.dart';
+import 'package:store_manager/screens/utils/pdf_functions.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
 
@@ -124,7 +126,43 @@ class _AddBillScreenState extends State<AddBillScreen> {
                             ),
                             SizedBox(width: 20.0),
                             RaisedButton(
-                              onPressed: () async => _addBill(),
+                              onPressed: () async {
+                                /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
+                                int number = invoiceNo;
+                                await _addBill();
+                                await PdfFunctions(
+                                  billItemsList:
+                                      _offlineBillItemsModel.getCompleteList(),
+                                  invoiceDate: _invoiceDateController.text,
+                                  invoiceNo: number,
+                                  customerName: _custNameController.text,
+                                  totalAmt: _totalAmt,
+                                  amtReceived: 0.00,
+                                  amtBalance: 0.00,
+                                ).writeAndSaveAndPrintPdf();
+                              },
+                              child: Text("Save and Print",
+                                  style: TextStyle(fontSize: 18)),
+                              color: Colors.blue,
+                              textColor: Colors.white,
+                            ),
+                            SizedBox(width: 20.0),
+                            RaisedButton(
+                              onPressed: () async {
+                                /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
+                                int number = invoiceNo;
+                                await _addBill();
+                                await PdfFunctions(
+                                  billItemsList:
+                                      _offlineBillItemsModel.getCompleteList(),
+                                  invoiceDate: _invoiceDateController.text,
+                                  invoiceNo: number,
+                                  customerName: _custNameController.text,
+                                  totalAmt: _totalAmt,
+                                  amtReceived: 0.00,
+                                  amtBalance: 0.00,
+                                ).writeAndSavePdf();
+                              },
                               child:
                                   Text("Save", style: TextStyle(fontSize: 18)),
                               color: Colors.blue,
@@ -276,7 +314,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
     for (int i = 0;
         i < _offlineBillItemsModel.getLengthOfOfflineBillItemsList();
         i++) {
-      OfflineBillItem current = _offlineBillItemsModel.getOfflineBillItem(i);
+      BillItem current = _offlineBillItemsModel.getOfflineBillItem(i);
       _totalAmt += current.amt;
       _totalTax += current.tax;
       _totalDiscount += current.discount;
@@ -341,7 +379,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
 
   _addNewBillItemRow() {
     setState(() {
-      _offlineBillItemsModel.addToOfflineBillItemsList(OfflineBillItem());
+      _offlineBillItemsModel.addToOfflineBillItemsList(BillItem());
       billModel.addNewUnitReadOnlyinBillItem();
     });
   }
@@ -512,10 +550,12 @@ class _AddBillScreenState extends State<AddBillScreen> {
   }
 
   _addBill() async {
+    _pleaseWaitAlertDialog();
+
     double finalAmt = _totalAmt - _totalDiscount + _totalTax;
     double amtPaid = 0;
 
-    List<OfflineBillItem> offlineBillItemsList =
+    List<BillItem> offlineBillItemsList =
         _offlineBillItemsModel.getCompleteList();
     List<BillItem> billItemsList = [];
 
@@ -570,5 +610,24 @@ class _AddBillScreenState extends State<AddBillScreen> {
         duration: Duration(seconds: 3),
       )..show(context);
     }
+
+    Navigator.pop(context);
+  }
+
+  Future<void> _pleaseWaitAlertDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Preparing Bill"),
+          content: SingleChildScrollView(
+            child: LoadingScreen(
+              message: "Please Wait...",
+            ),
+          ),
+        );
+      },
+    );
   }
 }

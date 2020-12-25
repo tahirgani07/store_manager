@@ -34,7 +34,7 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
   FocusNode focusNode = FocusNode();
   bool isClicked = false;
   OfflineBillItemsModel _offlineBillItemsModel;
-  OfflineBillItem currentOfflineBillItem;
+  BillItem currentOfflineBillItem;
   final LayerLink _layerLink = LayerLink();
 
   @override

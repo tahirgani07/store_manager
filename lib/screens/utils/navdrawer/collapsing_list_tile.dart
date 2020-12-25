@@ -57,25 +57,16 @@ class _CollapsingListTileState extends State<CollapsingListTile> {
                 ? SizedBox(width: 10)
                 : SizedBox(),
             (widthAnimation.value >= naveSizeToHideText)
-                ? widget.isUsernameTile
-                    ? MarqueeWidget(
-                        child: Text(
-                          widget.title,
-                          style: TextStyle(
-                            color: _getColor(),
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        widget.title,
-                        style: TextStyle(
-                          color: _getColor(),
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      )
+                ? MarqueeWidget(
+                    child: Text(
+                      widget.title,
+                      style: TextStyle(
+                        color: _getColor(),
+                        fontSize: 15.0,
+                        // fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
                 : SizedBox(),
           ],
         ),

@@ -46,22 +46,9 @@ class BillModel extends ChangeNotifier {
     DatabaseService databaseService = DatabaseService();
     return databaseService
         .getRefToBillsCollection(uid)
+        .orderBy('invoiceNo', descending: true)
         .snapshots()
         .map(_convertBillsSnapshots);
-  }
-
-  List<List<BillItem>> _convertBillItemsSnapshots(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      return [];
-    }).toList();
-  }
-
-  Stream<List<List<BillItem>>> fetchBillItemsDetails(String uid) {
-    DatabaseService databaseService = DatabaseService();
-    return databaseService
-        .getRefToBillsCollection(uid)
-        .snapshots()
-        .map(_convertBillItemsSnapshots);
   }
 
   Future<bool> addBill({
@@ -159,21 +146,21 @@ class Bill {
 }
 
 class BillItem {
-  final String name;
-  final double qty;
-  final String unit;
-  final double pricePerUnit;
-  final double discount;
-  final double tax;
-  final double amt;
+  String name;
+  double qty;
+  String unit;
+  double pricePerUnit;
+  double discount;
+  double tax;
+  double amt;
 
   BillItem({
-    this.unit,
-    this.pricePerUnit,
-    this.discount,
-    this.tax,
-    this.amt,
-    this.name,
-    this.qty,
+    this.name = "",
+    this.qty = 1,
+    this.unit = "",
+    this.pricePerUnit = 0,
+    this.discount = 0,
+    this.tax = 0,
+    this.amt = 0,
   });
 }

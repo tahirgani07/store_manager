@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store_manager/models/bills_model/bill_model.dart';
 
 enum ContainerToTextFieldType {
   qty,
@@ -9,9 +10,9 @@ enum ContainerToTextFieldType {
 }
 
 class OfflineBillItemsModel extends ChangeNotifier {
-  List<OfflineBillItem> _offlineBillItemsList = [];
+  List<BillItem> _offlineBillItemsList = [];
 
-  OfflineBillItem getOfflineBillItem(int index) => _offlineBillItemsList[index];
+  BillItem getOfflineBillItem(int index) => _offlineBillItemsList[index];
   int getLengthOfOfflineBillItemsList() => _offlineBillItemsList.length;
 
   void clearOfflineBillItemsList() {
@@ -19,9 +20,9 @@ class OfflineBillItemsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<OfflineBillItem> getCompleteList() => _offlineBillItemsList;
+  List<BillItem> getCompleteList() => _offlineBillItemsList;
 
-  void addToOfflineBillItemsList(OfflineBillItem offlineBillItem) {
+  void addToOfflineBillItemsList(BillItem offlineBillItem) {
     _offlineBillItemsList.add(offlineBillItem);
     notifyListeners();
   }
@@ -70,24 +71,4 @@ class OfflineBillItemsModel extends ChangeNotifier {
     _offlineBillItemsList[index].amt = amt;
     notifyListeners();
   }
-}
-
-class OfflineBillItem {
-  String name;
-  double qty;
-  String unit;
-  double pricePerUnit;
-  double discount;
-  double tax;
-  double amt;
-
-  OfflineBillItem({
-    this.name = "",
-    this.qty = 1,
-    this.unit = "",
-    this.pricePerUnit = 0,
-    this.discount = 0,
-    this.tax = 0,
-    this.amt = 0,
-  });
 }

@@ -32,6 +32,11 @@ dependencies:
   responsive_builder:
   get_it:
   flushbar: ^1.10.4
+  pdf: ^1.13.0
+  flutter_full_pdf_viewer: ^1.0.6
+  path_provider: ^1.6.24
+  http: ^0.12.2
+  printing: ^3.7.2
 
 
   # The following adds the Cupertino Icons font to your application.
