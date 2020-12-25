@@ -18,14 +18,14 @@ const RESOURCES = {
 "assets/assets/fonts/Nunito-SemiBoldItalic.ttf": "59cf0995782240777656a355cf08b234",
 "assets/FontManifest.json": "be4fbaef1ee4c05a2b05b69cbe5965b5",
 "assets/fonts/MaterialIcons-Regular.otf": "1288c9e28052e028aba623321f7826ac",
-"assets/NOTICES": "c82a87ba10749b35e63eccdea8314e85",
+"assets/NOTICES": "f712d04eb282ff00d99035cce0d88c95",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "b14fcf3ee94e3ace300b192e9e7c8c5d",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "a5880b2663cc52cbbc36867f862b7119",
-"/": "a5880b2663cc52cbbc36867f862b7119",
-"main.dart.js": "8bbfbf1803136868e1fb87e6e5f3c863",
+"index.html": "8cc0d2b59f45b23487ccd6837815ca81",
+"/": "8cc0d2b59f45b23487ccd6837815ca81",
+"main.dart.js": "11d458590b379206be06203958cc7a40",
 "manifest.json": "0ae46400765f2dfe8760040cffc4b09d",
 "version.json": "481087fdd65d697d57a07bf78eeddc55"
 };
