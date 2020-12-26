@@ -13,6 +13,7 @@ import 'package:store_manager/screens/utils/dropdown_textfields/bill_item_names_
 import 'package:store_manager/screens/utils/dropdown_textfields/customer_dropdown_textfield.dart';
 import 'package:store_manager/screens/utils/dropdown_textfields/unit_dropdown_textfield.dart';
 import 'package:store_manager/screens/utils/loading_screen.dart';
+import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/pdf_functions.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +39,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
   OfflineBillItemsModel _offlineBillItemsModel;
   ScrollController _scrollController;
   double _totalAmt = 0, _totalDiscount = 0, _totalTax = 0;
+  ToggleNavBar toggleNavBar;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Add Initial Items Row
       _addNewBillItemRow();
+      toggleNavBar.updateShow(false);
     });
     super.initState();
   }
@@ -72,6 +75,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
     billsList = Provider.of<List<Bill>>(context) ?? [];
     itemsList = Provider.of<List<Items>>(context) ?? [];
     _offlineBillItemsModel = Provider.of<OfflineBillItemsModel>(context);
+    toggleNavBar = Provider.of<ToggleNavBar>(context);
     super.didChangeDependencies();
   }
 
@@ -85,187 +89,187 @@ class _AddBillScreenState extends State<AddBillScreen> {
     customersList = Provider.of<List<Customer>>(context);
     var currentScreenSize = MediaQuery.of(context).size;
 
-    return GestureDetector(
-      onTap: () {
-        FocusScopeNode currentFocus = FocusScope.of(context);
-
-        if (!currentFocus.hasPrimaryFocus) {
-          currentFocus.unfocus();
-        }
+    return WillPopScope(
+      onWillPop: () async {
+        toggleNavBar.updateShow(true);
+        return true;
       },
-      child: Scaffold(
-        body: Column(
-          children: [
-            Material(
-              elevation: 8.0,
-              child: Container(
-                height: 55,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.symmetric(horizontal: BorderSide(width: 0.5)),
+      child: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: Scaffold(
+          body: Column(
+            children: [
+              Material(
+                elevation: 8.0,
+                child: Container(
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border:
+                        Border.symmetric(horizontal: BorderSide(width: 0.5)),
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Billing",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(),
+                          Row(
+                            children: [
+                              RaisedButton(
+                                onPressed: () async {
+                                  /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
+                                  int number = invoiceNo;
+                                  await _addBill();
+                                  await PdfFunctions(
+                                    billItemsList: _offlineBillItemsModel
+                                        .getCompleteList(),
+                                    invoiceDate: _invoiceDateController.text,
+                                    invoiceNo: number,
+                                    customerName: _custNameController.text,
+                                    totalAmt: _totalAmt,
+                                    amtReceived: 0.00,
+                                    amtBalance: 0.00,
+                                  ).writeAndSaveAndPrintPdf();
+                                },
+                                child: Text("Save and Print",
+                                    style: TextStyle(fontSize: 18)),
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                              ),
+                              SizedBox(width: 20.0),
+                              RaisedButton(
+                                onPressed: () async {
+                                  /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
+                                  int number = invoiceNo;
+                                  await _addBill();
+                                  await PdfFunctions(
+                                    billItemsList: _offlineBillItemsModel
+                                        .getCompleteList(),
+                                    invoiceDate: _invoiceDateController.text,
+                                    invoiceNo: number,
+                                    customerName: _custNameController.text,
+                                    totalAmt: _totalAmt,
+                                    amtReceived: 0.00,
+                                    amtBalance: 0.00,
+                                  ).writeAndSavePdf();
+                                },
+                                child: Text("Save",
+                                    style: TextStyle(fontSize: 18)),
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+              ),
+              Container(
+                height: 200,
+                padding: EdgeInsets.all(40.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Billing",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(),
-                        Row(
+                    Flexible(
+                      flex: (currentScreenSize.width >= desktopWidth) ? 1 : 2,
+                      child: Container(
+                        //color: Colors.green,
+                        alignment: Alignment.topLeft,
+                        child: CustomerDropDownTextField(
+                          controller: _custNameController,
+                          labelText: "Customer",
+                          customersList: customersList,
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 4,
+                      child: Container(
+                        width: 300,
+                        //color: Colors.red,
+                        alignment: Alignment.topRight,
+                        child: Row(
                           children: [
-                            RaisedButton(
-                              onPressed: () {},
-                              child:
-                                  Text("Share", style: TextStyle(fontSize: 18)),
-                              color: Colors.blue,
-                              textColor: Colors.white,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Inovice Number"),
+                                SizedBox(height: 20.0),
+                                Text("Invoice Date"),
+                              ],
                             ),
-                            SizedBox(width: 20.0),
-                            RaisedButton(
-                              onPressed: () async {
-                                /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
-                                int number = invoiceNo;
-                                await _addBill();
-                                await PdfFunctions(
-                                  billItemsList:
-                                      _offlineBillItemsModel.getCompleteList(),
-                                  invoiceDate: _invoiceDateController.text,
-                                  invoiceNo: number,
-                                  customerName: _custNameController.text,
-                                  totalAmt: _totalAmt,
-                                  amtReceived: 0.00,
-                                  amtBalance: 0.00,
-                                ).writeAndSaveAndPrintPdf();
-                              },
-                              child: Text("Save and Print",
-                                  style: TextStyle(fontSize: 18)),
-                              color: Colors.blue,
-                              textColor: Colors.white,
-                            ),
-                            SizedBox(width: 20.0),
-                            RaisedButton(
-                              onPressed: () async {
-                                /* We have to take the invoice number first as after the bill is updated it increases and wron invoice number will be entered in the pdf.*/
-                                int number = invoiceNo;
-                                await _addBill();
-                                await PdfFunctions(
-                                  billItemsList:
-                                      _offlineBillItemsModel.getCompleteList(),
-                                  invoiceDate: _invoiceDateController.text,
-                                  invoiceNo: number,
-                                  customerName: _custNameController.text,
-                                  totalAmt: _totalAmt,
-                                  amtReceived: 0.00,
-                                  amtBalance: 0.00,
-                                ).writeAndSavePdf();
-                              },
-                              child:
-                                  Text("Save", style: TextStyle(fontSize: 18)),
-                              color: Colors.blue,
-                              textColor: Colors.white,
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 25,
+                                    width: 150,
+                                    // Invoice Number TextField.
+                                    child: TextField(
+                                      controller: _invoiceNoController,
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(0))),
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.all(8.0),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Container(
+                                    height: 25,
+                                    width: 150,
+                                    // Invoice Date TextField.
+                                    child: TextField(
+                                      controller: _invoiceDateController,
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(0)),
+                                        ),
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.all(8.0),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Container(
-              height: 200,
-              padding: EdgeInsets.all(40.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    flex: (currentScreenSize.width >= desktopWidth) ? 1 : 2,
-                    child: Container(
-                      //color: Colors.green,
-                      alignment: Alignment.topLeft,
-                      child: CustomerDropDownTextField(
-                        controller: _custNameController,
-                        labelText: "Customer",
-                        customersList: customersList,
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 4,
-                    child: Container(
-                      width: 300,
-                      //color: Colors.red,
-                      alignment: Alignment.topRight,
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Inovice Number"),
-                              SizedBox(height: 20.0),
-                              Text("Invoice Date"),
-                            ],
-                          ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 25,
-                                  width: 150,
-                                  // Invoice Number TextField.
-                                  child: TextField(
-                                    controller: _invoiceNoController,
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(0))),
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(8.0),
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 10.0),
-                                Container(
-                                  height: 25,
-                                  width: 150,
-                                  // Invoice Date TextField.
-                                  child: TextField(
-                                    controller: _invoiceDateController,
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(0)),
-                                      ),
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(8.0),
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            _getItemsList(),
-            _getFooter(),
-          ],
+              _getItemsList(),
+              _getFooter(),
+            ],
+          ),
         ),
       ),
     );

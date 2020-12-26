@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/display_bill.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
+import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/pdf_functions.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
@@ -45,6 +44,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
   double totAmt;
 
   NavigationModel navigationModel;
+  ToggleNavBar toggleNavBar;
 
   @override
   void initState() {
@@ -58,6 +58,9 @@ class _BillMainScreenState extends State<BillMainScreen> {
       navigationModel.updateCurrentScreenIndex(index);
 
       navigationModel.addToStack(index);
+
+      /// show NavBar
+      toggleNavBar.updateShow(true);
     });
     super.initState();
   }
@@ -80,6 +83,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
   Widget build(BuildContext context) {
     uid = Provider.of<User>(context).uid;
     _fullBillsList = Provider.of<List<Bill>>(context) ?? [];
+    toggleNavBar = Provider.of<ToggleNavBar>(context);
 
     // Set the Paid-Unpaid Containers
     totAmtPaid = 0;
@@ -364,19 +368,27 @@ class _BillMainScreenState extends State<BillMainScreen> {
           child: Row(
             children: [
               _getFlexContainer(
-                  formatter.format(DateTime.fromMillisecondsSinceEpoch(
-                      int.parse(reqList[counter].invoiceDate))),
-                  2),
-              _getFlexContainer(reqList[counter].invoiceNo, 2,
-                  alignment: Alignment.centerRight),
+                formatter.format(DateTime.fromMillisecondsSinceEpoch(
+                    int.parse(reqList[counter].invoiceDate))),
+                2,
+              ),
+              _getFlexContainer(
+                reqList[counter].invoiceNo,
+                2,
+                alignment: Alignment.centerRight,
+              ),
               _getFlexContainer(reqList[counter].customerName, 5),
               _getFlexContainer("paymentType", 2),
               _getFlexContainer(
-                  "₹ ${reqList[counter].finalAmt.toStringAsFixed(2)}", 3,
-                  alignment: Alignment.centerRight),
+                "₹ ${reqList[counter].finalAmt.toStringAsFixed(2)}",
+                3,
+                alignment: Alignment.centerRight,
+              ),
               _getFlexContainer(
-                  "₹ ${reqList[counter].amtBalance.toStringAsFixed(2)}", 2,
-                  alignment: Alignment.centerRight),
+                "₹ ${reqList[counter].amtBalance.toStringAsFixed(2)}",
+                2,
+                alignment: Alignment.centerRight,
+              ),
               _downloadShareBillButtons(flex: 2, bill: reqList[counter]),
             ],
           ),

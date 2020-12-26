@@ -7,6 +7,7 @@ import 'package:store_manager/models/customer_model/customer_model.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/customer_screen/customer_screen_alert_dialog.dart';
+import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:store_manager/services/navigation_service.dart';
 
@@ -21,6 +22,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
   List<Customer> _customersList;
   ScrollController _scrollController;
   NavigationModel navigationModel;
+  ToggleNavBar toggleNavBar;
 
   @override
   void initState() {
@@ -31,6 +33,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
       int index = 2;
       navigationModel.updateCurrentScreenIndex(index);
       navigationModel.addToStack(index);
+
+      /// Show NavBar
+      toggleNavBar.updateShow(true);
     });
     super.initState();
   }
@@ -45,6 +50,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
   @override
   Widget build(BuildContext context) {
     _customersList = Provider.of<List<Customer>>(context) ?? [];
+    toggleNavBar = Provider.of<ToggleNavBar>(context);
+
     String uid = Provider.of<User>(context).uid ?? "";
     return WillPopScope(
       onWillPop: () async {

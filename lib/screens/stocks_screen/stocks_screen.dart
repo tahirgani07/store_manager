@@ -5,6 +5,7 @@ import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/stocks_screen/stock_items_datatable.dart';
 import 'package:store_manager/screens/stocks_screen/stock_trans_list.dart';
+import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:store_manager/services/navigation_service.dart';
 
@@ -15,6 +16,8 @@ class StocksScreen extends StatefulWidget {
 
 class _StocksScreenState extends State<StocksScreen> {
   NavigationModel navigationModel;
+  ToggleNavBar toggleNavBar;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -22,12 +25,18 @@ class _StocksScreenState extends State<StocksScreen> {
       int index = 1;
       navigationModel.updateCurrentScreenIndex(index);
       navigationModel.addToStack(index);
+
+      /// show NavBar
+      toggleNavBar.updateShow(true);
     });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    toggleNavBar = Provider.of<ToggleNavBar>(context);
+
     return WillPopScope(
       onWillPop: () async {
         int lastIndex = 0;

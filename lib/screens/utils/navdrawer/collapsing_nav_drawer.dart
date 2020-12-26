@@ -38,7 +38,6 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   @override
   Widget build(BuildContext context) {
     name = Provider.of<User>(context).displayName;
-    double screenWidth = MediaQuery.of(context).size.width;
 
     Function(String) onSelectTab = widget.onSelectTab;
 
@@ -67,10 +66,8 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
                       itemBuilder: (context, counter) {
                         return CollapsingListTile(
                           onTap: () {
-                            if (navigationModel.currentScreenIndex == counter)
-                              return;
-                            // navigationModel.updateCurrentScreenIndex(counter);
-                            // navigationModel.addToStack(counter);
+                            // if (navigationModel.currentScreenIndex == counter)
+                            //   return;
                             onSelectTab(navigationItems[counter].routeName);
                           },
                           isSelected:
