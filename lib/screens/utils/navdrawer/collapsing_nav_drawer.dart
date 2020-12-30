@@ -8,7 +8,7 @@ import 'package:store_manager/screens/utils/navdrawer/collapsing_list_tile.dart'
 import 'package:store_manager/screens/utils/theme.dart';
 
 class CollapsingNavigationDrawer extends StatefulWidget {
-  final Function(String) onSelectTab;
+  final Function(String, bool) onSelectTab;
 
   const CollapsingNavigationDrawer({Key key, @required this.onSelectTab})
       : super(key: key);
@@ -39,88 +39,92 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
   Widget build(BuildContext context) {
     name = Provider.of<User>(context).displayName;
 
-    Function(String) onSelectTab = widget.onSelectTab;
+    Function(String, bool) onSelectTab = widget.onSelectTab;
 
-    return AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, widget) {
-          return Container(
-            width: widthAnimation.value,
-            color: drawerBgColor,
-            child: Column(
-              children: [
-                CollapsingListTile(
-                  isUsernameTile: true,
-                  title: "$name",
-                  icon: Icons.person,
-                  animationController: _animationController,
-                ),
-                Divider(height: 50, color: Colors.white70, thickness: 0.3),
-                Expanded(
-                  child: Consumer<NavigationModel>(
-                      builder: (context, navigationModel, _) {
-                    return ListView.separated(
-                      separatorBuilder: (context, counter) {
-                        return Divider(height: 12.0);
-                      },
-                      itemBuilder: (context, counter) {
-                        return CollapsingListTile(
-                          onTap: () {
-                            // if (navigationModel.currentScreenIndex == counter)
-                            //   return;
-                            onSelectTab(navigationItems[counter].routeName);
-                          },
-                          isSelected:
-                              navigationModel.currentScreenIndex == counter,
-                          title: navigationItems[counter].title,
-                          icon: navigationItems[counter].icon,
-                          animationController: _animationController,
-                        );
-                      },
-                      itemCount: navigationItems.length,
-                    );
-                  }),
-                ),
-                Divider(height: 20, color: Colors.white70, thickness: 0.3),
-                CollapsingListTile(
-                  isLogoutTile: true,
-                  title: "Sign Out",
-                  icon: Icons.logout,
-                  onTap: () => AuthService().signOut(),
-                  animationController: _animationController,
-                ),
-                Divider(height: 20, color: Colors.white70, thickness: 0.3),
-                ResponsiveBuilder(
-                  builder: (context, sizeInfo) {
-                    if (sizeInfo.isDesktop) {
-                      return Container(
-                        padding: EdgeInsets.only(right: 25),
-                        alignment: Alignment.centerRight,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              isCollapsed = !isCollapsed;
-                              isCollapsed
-                                  ? _animationController.forward()
-                                  : _animationController.reverse();
-                            });
-                          },
-                          child: AnimatedIcon(
-                            icon: AnimatedIcons.arrow_menu,
-                            progress: _animationController,
-                            color: Colors.white,
-                            size: 20.0,
-                          ),
-                        ),
+    return SafeArea(
+      child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, widget) {
+            return Container(
+              width: widthAnimation.value,
+              color: drawerBgColor,
+              child: Column(
+                children: [
+                  CollapsingListTile(
+                    isUsernameTile: true,
+                    title: "$name",
+                    icon: Icons.person,
+                    animationController: _animationController,
+                  ),
+                  Divider(height: 50, color: Colors.white70, thickness: 0.3),
+                  Expanded(
+                    child: Consumer<NavigationModel>(
+                        builder: (context, navigationModel, _) {
+                      return ListView.separated(
+                        separatorBuilder: (context, counter) {
+                          return Divider(height: 12.0);
+                        },
+                        itemBuilder: (context, counter) {
+                          return CollapsingListTile(
+                            onTap: () {
+                              bool sameTabPressed = false;
+                              if (navigationModel.currentScreenIndex == counter)
+                                sameTabPressed = true;
+                              onSelectTab(navigationItems[counter].routeName,
+                                  sameTabPressed);
+                            },
+                            isSelected:
+                                navigationModel.currentScreenIndex == counter,
+                            title: navigationItems[counter].title,
+                            icon: navigationItems[counter].icon,
+                            animationController: _animationController,
+                          );
+                        },
+                        itemCount: navigationItems.length,
                       );
-                    } else
-                      return SizedBox();
-                  },
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
-          );
-        });
+                    }),
+                  ),
+                  Divider(height: 20, color: Colors.white70, thickness: 0.3),
+                  CollapsingListTile(
+                    isLogoutTile: true,
+                    title: "Sign Out",
+                    icon: Icons.logout,
+                    onTap: () => AuthService().signOut(),
+                    animationController: _animationController,
+                  ),
+                  Divider(height: 20, color: Colors.white70, thickness: 0.3),
+                  ResponsiveBuilder(
+                    builder: (context, sizeInfo) {
+                      if (sizeInfo.isDesktop) {
+                        return Container(
+                          padding: EdgeInsets.only(right: 25),
+                          alignment: Alignment.centerRight,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                isCollapsed = !isCollapsed;
+                                isCollapsed
+                                    ? _animationController.forward()
+                                    : _animationController.reverse();
+                              });
+                            },
+                            child: AnimatedIcon(
+                              icon: AnimatedIcons.arrow_menu,
+                              progress: _animationController,
+                              color: Colors.white,
+                              size: 20.0,
+                            ),
+                          ),
+                        );
+                      } else
+                        return SizedBox();
+                    },
+                  ),
+                  SizedBox(height: 20),
+                ],
+              ),
+            );
+          }),
+    );
   }
 }

@@ -400,8 +400,11 @@ class _AddBillScreenState extends State<AddBillScreen> {
           color: color,
           child: Row(
             children: [
-              getFlexContainer("${counter + 1}", 1,
-                  alignment: Alignment.center, border: false),
+              getFlexContainer(
+                "${counter + 1}",
+                1,
+                alignment: Alignment.center,
+              ),
               Flexible(
                 flex: 15,
                 child: Container(
@@ -534,17 +537,41 @@ class _AddBillScreenState extends State<AddBillScreen> {
           color: Colors.white,
           child: Row(
             children: [
-              getFlexContainer("#", 1,
-                  alignment: Alignment.center, textBold: true),
-              getFlexContainer("ITEM", 15, textBold: true),
-              getFlexContainer("QTY", 3, textBold: true),
-              getFlexContainer("UNIT", 3, textBold: true),
-              getFlexContainer("PRICE/UNIT", 4, textBold: true),
-              getFlexContainer("DISCOUNT", 5,
-                  alignment: Alignment.center, textBold: true),
-              getFlexContainer("TAX", 6,
-                  alignment: Alignment.center, textBold: true),
-              getFlexContainer("AMOUNT", 3, textBold: true),
+              getFlexContainer(
+                "#",
+                1,
+                alignment: Alignment.center,
+              ),
+              getFlexContainer(
+                "ITEM",
+                15,
+              ),
+              getFlexContainer(
+                "QTY",
+                3,
+              ),
+              getFlexContainer(
+                "UNIT",
+                3,
+              ),
+              getFlexContainer(
+                "PRICE/UNIT",
+                4,
+              ),
+              getFlexContainer(
+                "DISCOUNT",
+                5,
+                alignment: Alignment.center,
+              ),
+              getFlexContainer(
+                "TAX",
+                6,
+                alignment: Alignment.center,
+              ),
+              getFlexContainer(
+                "AMOUNT",
+                3,
+              ),
               getFlexContainer("", 1),
             ],
           ),
@@ -615,6 +642,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
       )..show(context);
     }
 
+    /// show NavBar
+    toggleNavBar.updateShow(true);
     Navigator.pop(context);
   }
 

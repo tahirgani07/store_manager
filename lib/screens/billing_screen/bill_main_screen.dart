@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/locator.dart';
 import 'package:store_manager/models/bills_model/bill_model.dart';
 import 'package:store_manager/models/database_service.dart';
@@ -10,6 +11,7 @@ import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/display_bill.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
+import 'package:store_manager/screens/utils/navdrawer/collapsing_nav_drawer.dart';
 import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/pdf_functions.dart';
 import 'package:store_manager/screens/utils/theme.dart';
@@ -52,23 +54,20 @@ class _BillMainScreenState extends State<BillMainScreen> {
     startDateController = TextEditingController();
     endDateController = TextEditingController();
     searchController = TextEditingController();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigationModel = Provider.of<NavigationModel>(context, listen: false);
       int index = 0;
+      bool sameTab = navigationModel.currentScreenIndex == index;
+
       navigationModel.updateCurrentScreenIndex(index);
 
-      navigationModel.addToStack(index);
+      if (!sameTab) navigationModel.addToStack(index);
 
       /// show NavBar
       toggleNavBar.updateShow(true);
     });
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    _datedBillsList = Provider.of<List<Bill>>(context, listen: false) ?? [];
-    super.didChangeDependencies();
   }
 
   @override
@@ -83,6 +82,13 @@ class _BillMainScreenState extends State<BillMainScreen> {
   Widget build(BuildContext context) {
     uid = Provider.of<User>(context).uid;
     _fullBillsList = Provider.of<List<Bill>>(context) ?? [];
+
+    if (startDateController.text.isEmpty &&
+        endDateController.text.isEmpty &&
+        _datedBillsList.isEmpty &&
+        _fullBillsList.isNotEmpty) {
+      _datedBillsList = _fullBillsList;
+    }
     toggleNavBar = Provider.of<ToggleNavBar>(context);
 
     // Set the Paid-Unpaid Containers
@@ -106,7 +112,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
           navigationModel.resetIndexStack();
           if (navigationModel.currentScreenIndex != lastIndex) {
             navigationModel.updateCurrentScreenIndex(lastIndex);
-            locator<NavigationService>().navigateTo(BillTransRoute);
+            locator<NavigationService>().navigateTo(BillTransRoute, true);
           }
           return false;
         }
@@ -119,133 +125,199 @@ class _BillMainScreenState extends State<BillMainScreen> {
             currentFocus.unfocus();
           }
         },
-        child: Scaffold(
-          body: Container(
-            padding: EdgeInsets.all(10.0),
-            color: bgColor,
-            child: Column(
-              children: [
-                Material(
-                  color: Colors.white,
-                  elevation: 8.0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 10.0),
-                    child: Column(
-                      children: [
-                        Row(
+        child: ResponsiveBuilder(
+          builder: (context, sizingInfo) {
+            return Scaffold(
+              backgroundColor: CustomColors.bgBlue,
+              resizeToAvoidBottomInset: false,
+              ///////////////////////// APP BAR
+              appBar: (!sizingInfo.isDesktop)
+                  ? AppBar(
+                      title: Text("Bills"),
+                    )
+                  : null,
+              ////////////////////// DRAWER
+              drawer: (!sizingInfo.isDesktop)
+                  ? CollapsingNavigationDrawer(
+                      onSelectTab: (routeName, sameTabPressed) {
+                        if (!sizingInfo.isDesktop) Navigator.pop(context);
+                        locator<NavigationService>()
+                            .navigateTo(routeName, sameTabPressed);
+                      },
+                    )
+                  : SizedBox(),
+              /////////////////////// BODY
+              body: Container(
+                padding: sizingInfo.isDesktop
+                    ? EdgeInsets.all(10.0)
+                    : EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    Material(
+                      color: Colors.white,
+                      elevation: 8.0,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 10.0),
+                        child: Column(
                           children: [
-                            Container(
-                              child: DropdownButton(
-                                  underline: SizedBox(),
-                                  icon: Icon(Icons.keyboard_arrow_down),
-                                  value: filterTransDropdownVal,
-                                  items: filterTransList.map((val) {
-                                    return DropdownMenuItem(
-                                      value: val,
-                                      child: Text(
-                                        val,
-                                        style: CustomTextStyle.blue_bold_big,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String newVal) {
-                                    changeDateTextfieldWrtDropdown(newVal);
-                                    _onDateTextFieldChanged();
-                                    setState(() {
-                                      filterTransDropdownVal = newVal;
-                                    });
-                                  }),
-                            ),
-                            SizedBox(width: 10),
-                            Container(
-                              height: 32,
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.all(4),
-                              child: Text("Between",
-                                  style: TextStyle(color: Colors.white)),
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5)),
-                              ),
-                            ),
-                            Container(
-                              height: 32,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular(5),
-                                  topRight: Radius.circular(5),
+                            Row(
+                              children: [
+                                showOnlyForDesktop(
+                                  sizingInfo: sizingInfo,
+                                  widgetDesk: Container(
+                                    child: DropdownButton(
+                                        underline: SizedBox(),
+                                        icon: Icon(Icons.keyboard_arrow_down),
+                                        value: filterTransDropdownVal,
+                                        items: filterTransList.map((val) {
+                                          return DropdownMenuItem(
+                                            value: val,
+                                            child: Text(
+                                              val,
+                                              style:
+                                                  CustomTextStyle.blue_bold_big,
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (String newVal) {
+                                          changeDateTextfieldWrtDropdown(
+                                              newVal);
+                                          _onDateTextFieldChanged();
+                                          setState(() {
+                                            filterTransDropdownVal = newVal;
+                                          });
+                                        }),
+                                  ),
                                 ),
-                              ),
-                              child: Row(
+                                showOnlyForDesktop(
+                                  sizingInfo: sizingInfo,
+                                  widgetDesk: SizedBox(width: 10),
+                                ),
+                                Container(
+                                  height: 32,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.all(4),
+                                  child: Text("Between",
+                                      style: TextStyle(color: Colors.white)),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(5),
+                                        bottomLeft: Radius.circular(5)),
+                                  ),
+                                ),
+                                _getDateFieldsRow(sizingInfo),
+                                SizedBox(width: 10),
+                                showOnlyForDesktop(
+                                  widgetDesk: _clearDateFieldsButtonDesktop(),
+                                  sizingInfo: sizingInfo,
+                                  widgetMob: _clearDateFieldsButtonMob(),
+                                ),
+                              ],
+                            ),
+                            showOnlyForDesktop(
+                              sizingInfo: sizingInfo,
+                              widgetDesk: SizedBox(height: 15),
+                            ),
+                            showOnlyForDesktop(
+                              sizingInfo: sizingInfo,
+                              widgetDesk: Row(
                                 children: [
-                                  _customDatePickerTextField(
-                                      "START", startDateController),
-                                  Text("To", style: TextStyle(fontSize: 12)),
-                                  _customDatePickerTextField(
-                                      "END", endDateController),
+                                  customContainer(
+                                    title: "Paid",
+                                    amt: totAmtPaid.toStringAsFixed(2),
+                                    color: Color(0xffB9F3E7),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Text("+",
+                                        style: CustomTextStyle.bigIcons),
+                                  ),
+                                  customContainer(
+                                    title: "Unpaid",
+                                    amt: totAmtBalance.toStringAsFixed(2),
+                                    color: Color(0xffCFE6FE),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Text("=",
+                                        style: CustomTextStyle.bigIcons),
+                                  ),
+                                  customContainer(
+                                    title: "Total",
+                                    amt: totAmt.toStringAsFixed(2),
+                                    color: Color(0xffF8C889),
+                                  ),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 10),
-                            RaisedButton(
-                              color: Colors.redAccent,
-                              textColor: Colors.white,
-                              child: Text("Clear"),
-                              onPressed: () {
-                                startDateController.clear();
-                                endDateController.clear();
-                                filterTransDropdownVal = filterTransList[0];
-                                _onDateTextFieldChanged();
-                              },
-                            ),
                           ],
                         ),
-                        SizedBox(height: 15),
-                        Row(
-                          children: [
-                            customContainer(
-                              title: "Paid",
-                              amt: totAmtPaid.toStringAsFixed(2),
-                              color: Color(0xffB9F3E7),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text("+", style: CustomTextStyle.bigIcons),
-                            ),
-                            customContainer(
-                              title: "Unpaid",
-                              amt: totAmtBalance.toStringAsFixed(2),
-                              color: Color(0xffCFE6FE),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text("=", style: CustomTextStyle.bigIcons),
-                            ),
-                            customContainer(
-                              title: "Total",
-                              amt: totAmt.toStringAsFixed(2),
-                              color: Color(0xffF8C889),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 10),
+                    _getBillTrans(),
+                  ],
                 ),
-                SizedBox(height: 10),
-                _getBillTrans(),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  _getDateFieldsRow(SizingInformation sizingInfo) {
+    Widget widget = Container(
+      height: 32,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.only(
+          bottomRight: Radius.circular(5),
+          topRight: Radius.circular(5),
+        ),
+      ),
+      child: Row(
+        children: [
+          _customDatePickerTextField("START", startDateController, sizingInfo),
+          Text("To", style: TextStyle(fontSize: 12)),
+          _customDatePickerTextField("END", endDateController, sizingInfo),
+        ],
+      ),
+    );
+    if (sizingInfo.isDesktop) return widget;
+    return Expanded(child: widget);
+  }
+
+  _clearDateFieldsButtonDesktop() {
+    return RaisedButton(
+      color: Colors.redAccent,
+      textColor: Colors.white,
+      child: Text("Clear"),
+      onPressed: () {
+        startDateController.clear();
+        endDateController.clear();
+        filterTransDropdownVal = filterTransList[0];
+        _onDateTextFieldChanged();
+      },
+    );
+  }
+
+  _clearDateFieldsButtonMob() {
+    return IconButton(
+      color: Colors.redAccent,
+      splashRadius: 20,
+      icon: Icon(Icons.clear),
+      onPressed: () {
+        startDateController.clear();
+        endDateController.clear();
+        filterTransDropdownVal = filterTransList[0];
+        _onDateTextFieldChanged();
+      },
     );
   }
 
@@ -261,17 +333,31 @@ class _BillMainScreenState extends State<BillMainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("TRANSACTIONS", style: CustomTextStyle.blue_bold_med),
+                  Text("TRANSACTIONS", style: CustomTextStyle.blue_bold_reg),
                   SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Container(
-                        width: 300,
-                        child: _getSearchBar(_onSearchTextChanged),
-                      ),
-                      SizedBox(width: 50),
-                      _addBillButton(),
-                    ],
+                  ResponsiveBuilder(
+                    builder: (context, sizingInfo) {
+                      return Row(
+                        children: [
+                          Flexible(
+                            flex: 1,
+                            child: getSearchBar(
+                              searchController,
+                              _onSearchTextChanged,
+                            ),
+                          ),
+                          (sizingInfo.isDesktop)
+                              ? SizedBox(width: 50)
+                              : SizedBox(),
+                          (sizingInfo.isDesktop)
+                              ? Flexible(
+                                  flex: 1,
+                                  child: _addBillButton(),
+                                )
+                              : SizedBox(),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -297,104 +383,159 @@ class _BillMainScreenState extends State<BillMainScreen> {
   }
 
   _addBillButton() {
-    return RaisedButton(
-      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-      shape: RoundedRectangleBorder(
-        borderRadius: new BorderRadius.circular(30.0),
-      ),
-      onPressed: () => Navigator.pushNamed(context, AddBillRoute),
-      color: Colors.blue,
-      textColor: Colors.white,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 10,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.blue,
-            child: Icon(Icons.add, size: 18),
-          ),
-          SizedBox(width: 8),
-          Text("Add Bill"),
-        ],
+    return Container(
+      width: 120,
+      child: addSomethingButton(
+        context: context,
+        text: "Add Bill",
+        onPressed: () => Navigator.pushNamed(context, AddBillRoute),
       ),
     );
   }
 
   _getHeadingRow() {
-    return Row(
-      children: [
-        _getFlexContainer("DATE", 2, header: true),
-        _getFlexContainer(
-          "INVOICE NO",
-          2,
-          header: true,
-          alignment: Alignment.center,
-        ),
-        _getFlexContainer("CUSTOMER NAME", 5, header: true),
-        _getFlexContainer("PAYMENT TYPE", 2, header: true),
-        _getFlexContainer(
-          "AMOUNT",
-          3,
-          header: true,
-          alignment: Alignment.center,
-        ),
-        _getFlexContainer(
-          "BALANCE DUE",
-          2,
-          header: true,
-          alignment: Alignment.center,
-        ),
-        _getFlexContainer("", 2, header: true),
-      ],
+    return ResponsiveBuilder(
+      builder: (context, sizingInfo) {
+        return Row(
+          children: [
+            sizingInfo.isDesktop
+                ? getFlexContainer("DATE", 2, header: true)
+                : SizedBox(),
+            getFlexContainer(
+              "INVOICE NO",
+              2,
+              header: true,
+              alignment: Alignment.center,
+              color: CustomColors.lightGrey,
+            ),
+            getFlexContainer("CUSTOMER NAME", 5, header: true),
+            sizingInfo.isDesktop
+                ? getFlexContainer(
+                    "PAYMENT TYPE",
+                    2,
+                    header: true,
+                    color: CustomColors.lightGrey,
+                  )
+                : SizedBox(),
+            getFlexContainer(
+              "AMOUNT",
+              3,
+              header: true,
+              alignment: Alignment.center,
+              color: sizingInfo.isDesktop ? null : CustomColors.lightGrey,
+            ),
+            sizingInfo.isDesktop
+                ? getFlexContainer(
+                    "BALANCE DUE",
+                    2,
+                    header: true,
+                    alignment: Alignment.center,
+                    color: CustomColors.lightGrey,
+                  )
+                : SizedBox(),
+            sizingInfo.isDesktop
+                ? getFlexContainer("", 2, header: true)
+                : SizedBox(),
+          ],
+        );
+      },
     );
   }
 
   _getList(List<Bill> reqList) {
-    return ListView.builder(
-      itemCount: reqList.length,
-      itemBuilder: (context, counter) {
-        return InkWell(
-          onTap: () async {
-            List<BillItem> reqBillItemsList =
-                await _getBillItemsList(reqList[counter].invoiceDate);
+    bool noData = reqList.length == 0;
+    return noData
+        ? Center(child: Text("NO DATA"))
+        : ListView.builder(
+            itemCount: reqList.length,
+            itemBuilder: (context, counter) {
+              return InkWell(
+                onTap: () async {
+                  List<BillItem> reqBillItemsList =
+                      await _getBillItemsList(reqList[counter].invoiceDate);
+                  // Since in reqList of bill we dont have billItemsList.
+                  Bill bill = Bill(
+                    customerId: reqList[counter].customerId,
+                    customerName: reqList[counter].customerName,
+                    invoiceNo: reqList[counter].invoiceNo,
+                    invoiceDate: reqList[counter].invoiceDate,
+                    grossAmt: reqList[counter].grossAmt,
+                    taxAmt: reqList[counter].taxAmt,
+                    discountAmt: reqList[counter].discountAmt,
+                    finalAmt: reqList[counter].finalAmt,
+                    amtBalance: reqList[counter].amtBalance,
+                    amtPaid: reqList[counter].amtPaid,
+                    billItemsList: reqBillItemsList,
+                  );
 
-            Navigator.of(context).push(MaterialPageRoute(
-              settings: RouteSettings(name: '/display_bill'),
-              builder: (context) => DisplayBill(
-                billItemsList: reqBillItemsList,
-              ),
-            ));
-          },
-          child: Row(
-            children: [
-              _getFlexContainer(
-                formatter.format(DateTime.fromMillisecondsSinceEpoch(
-                    int.parse(reqList[counter].invoiceDate))),
-                2,
-              ),
-              _getFlexContainer(
-                reqList[counter].invoiceNo,
-                2,
-                alignment: Alignment.centerRight,
-              ),
-              _getFlexContainer(reqList[counter].customerName, 5),
-              _getFlexContainer("paymentType", 2),
-              _getFlexContainer(
-                "₹ ${reqList[counter].finalAmt.toStringAsFixed(2)}",
-                3,
-                alignment: Alignment.centerRight,
-              ),
-              _getFlexContainer(
-                "₹ ${reqList[counter].amtBalance.toStringAsFixed(2)}",
-                2,
-                alignment: Alignment.centerRight,
-              ),
-              _downloadShareBillButtons(flex: 2, bill: reqList[counter]),
-            ],
-          ),
-        );
-      },
-    );
+                  Navigator.of(context).push(MaterialPageRoute(
+                    settings: RouteSettings(name: '/display_bill'),
+                    builder: (context) => DisplayBill(
+                      bill: bill,
+                    ),
+                  ));
+                },
+                child: ResponsiveBuilder(builder: (context, sizingInfo) {
+                  return Row(
+                    children: [
+                      // Invoice Date
+                      sizingInfo.isDesktop
+                          ? getFlexContainer(
+                              formatter.format(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                      int.parse(reqList[counter].invoiceDate))),
+                              2,
+                            )
+                          : SizedBox(),
+                      // Invoice No.
+                      getFlexContainer(
+                        reqList[counter].invoiceNo,
+                        2,
+                        alignment: Alignment.center,
+                        color: CustomColors.lightGrey,
+                      ),
+                      // Customer Name.
+                      getFlexContainer(reqList[counter].customerName, 5),
+                      // Payment Type.
+                      sizingInfo.isDesktop
+                          ? getFlexContainer(
+                              "paymentType",
+                              2,
+                              color: CustomColors.lightGrey,
+                            )
+                          : SizedBox(),
+                      // Final Amount.
+                      getFlexContainer(
+                        "₹ ${reqList[counter].finalAmt.toStringAsFixed(2)}",
+                        3,
+                        alignment: Alignment.centerRight,
+                        color: sizingInfo.isDesktop
+                            ? null
+                            : CustomColors.lightGrey,
+                      ),
+                      // Amt Balance.
+                      sizingInfo.isDesktop
+                          ? getFlexContainer(
+                              "₹ ${reqList[counter].amtBalance.toStringAsFixed(2)}",
+                              2,
+                              alignment: Alignment.centerRight,
+                              color: CustomColors.lightGrey,
+                            )
+                          : SizedBox(),
+                      // Download Share Buttons.
+                      showOnlyForDesktop(
+                        sizingInfo: sizingInfo,
+                        widgetDesk: _downloadShareBillButtons(
+                          flex: 2,
+                          bill: reqList[counter],
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              );
+            },
+          );
   }
 
   _downloadShareBillButtons({@required int flex, @required Bill bill}) {
@@ -475,45 +616,14 @@ class _BillMainScreenState extends State<BillMainScreen> {
     return snapshot.docs.map((doc) {
       return BillItem(
         name: doc["name"],
-        qty: doc["qty"],
+        qty: doc["qty"].toDouble(),
         unit: doc["unit"],
-        pricePerUnit: doc["pricePerUnit"],
-        discount: doc["discount"],
-        tax: doc["tax"],
-        amt: doc["amt"],
+        pricePerUnit: doc["pricePerUnit"].toDouble(),
+        discount: doc["discount"].toDouble(),
+        tax: doc["tax"].toDouble(),
+        amt: doc["amt"].toDouble(),
       );
     }).toList();
-  }
-
-  _getFlexContainer(
-    String title,
-    int flex, {
-    Alignment alignment,
-    bool header = false,
-  }) {
-    return Flexible(
-      flex: flex,
-      child: Container(
-        height: 40,
-        alignment: alignment ?? Alignment.centerLeft,
-        padding: EdgeInsets.symmetric(horizontal: 5.0),
-        decoration: BoxDecoration(
-          border: Border(
-              bottom: (header)
-                  ? BorderSide(color: Colors.grey, width: 0.5)
-                  : BorderSide.none,
-              right: BorderSide(color: Colors.grey, width: 0.5)),
-        ),
-        child: MarqueeWidget(
-          child: Text(
-            title,
-            style: (header)
-                ? CustomTextStyle.grey_bold_small
-                : TextStyle(fontSize: 13),
-          ),
-        ),
-      ),
-    );
   }
 
   _onSearchTextChanged(String text) {
@@ -560,8 +670,9 @@ class _BillMainScreenState extends State<BillMainScreen> {
           int.parse(bill.invoiceDate) <= endDate) {
         _datedBillsList.add(bill);
       }
-      setState(() {});
     });
+
+    setState(() {});
   }
 
   int _getIntDateFromFormattedStringDate(String date, {bool endDate = false}) {
@@ -596,11 +707,11 @@ class _BillMainScreenState extends State<BillMainScreen> {
     );
   }
 
-  Widget _customDatePickerTextField(
-      String type, TextEditingController controller) {
-    return Container(
+  Widget _customDatePickerTextField(String type,
+      TextEditingController controller, SizingInformation sizingInfo) {
+    Widget widget = Container(
       alignment: Alignment.center,
-      width: 120,
+      width: sizingInfo.isDesktop ? 120 : null,
       child: TextField(
           controller: controller,
           readOnly: true,
@@ -622,6 +733,10 @@ class _BillMainScreenState extends State<BillMainScreen> {
             });
           }),
     );
+
+    if (sizingInfo.isDesktop) return widget;
+
+    return Flexible(flex: 1, child: widget);
   }
 
   Future<DateTime> _getDateFromPopup(
@@ -659,32 +774,5 @@ class _BillMainScreenState extends State<BillMainScreen> {
         startDateController.clear();
         endDateController.clear();
     }
-  }
-
-  Widget _getSearchBar(Function onSearchTextChanged) {
-    return Container(
-      height: 35,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      alignment: Alignment.center,
-      child: TextField(
-        controller: searchController,
-        decoration: InputDecoration(
-          // hintText: 'Search',
-          border: InputBorder.none,
-          isDense: true,
-          prefixIcon: Container(
-            margin: EdgeInsets.symmetric(horizontal: 5.0),
-            child: Icon(Icons.search, size: 20),
-          ),
-          prefixIconConstraints: BoxConstraints(maxWidth: 30, maxHeight: 30),
-        ),
-        style: TextStyle(
-          fontSize: 14,
-        ),
-        onChanged: onSearchTextChanged,
-      ),
-    );
   }
 }

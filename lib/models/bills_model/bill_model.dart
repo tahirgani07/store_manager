@@ -32,12 +32,12 @@ class BillModel extends ChangeNotifier {
         customerName: doc['customerName'],
         invoiceNo: doc['invoiceNo'],
         invoiceDate: doc['invoiceDate'],
-        grossAmt: doc['grossAmt'],
-        taxAmt: doc['taxAmt'],
-        discountAmt: doc['discountAmt'],
-        finalAmt: doc['finalAmt'],
-        amtPaid: doc['amtPaid'],
-        amtBalance: doc['amtBalance'],
+        grossAmt: doc['grossAmt'].toDouble(),
+        taxAmt: doc['taxAmt'].toDouble(),
+        discountAmt: doc['discountAmt'].toDouble(),
+        finalAmt: doc['finalAmt'].toDouble(),
+        amtPaid: doc['amtPaid'].toDouble(),
+        amtBalance: doc['amtBalance'].toDouble(),
       );
     }).toList();
   }

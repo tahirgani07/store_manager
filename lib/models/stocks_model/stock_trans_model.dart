@@ -10,7 +10,7 @@ class StockTransModel {
         type: doc['type'],
         itemName: doc['itemName'],
         unit: doc['unit'],
-        quantity: doc['quantity'],
+        quantity: doc['quantity'].toDouble(),
         creationDate: doc['creationDate'],
       );
     }).toList();

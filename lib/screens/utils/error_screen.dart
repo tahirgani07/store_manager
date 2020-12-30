@@ -18,8 +18,12 @@ class _ErrorScreenState extends State<ErrorScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigationModel = Provider.of<NavigationModel>(context, listen: false);
       int index = 3;
+
+      bool sameTab = navigationModel.currentScreenIndex == index;
+
       navigationModel.updateCurrentScreenIndex(index);
-      navigationModel.addToStack(index);
+
+      if (!sameTab) navigationModel.addToStack(index);
     });
     super.initState();
   }
@@ -37,7 +41,7 @@ class _ErrorScreenState extends State<ErrorScreen> {
           navigationModel.resetIndexStack();
           if (navigationModel.currentScreenIndex != lastIndex) {
             navigationModel.updateCurrentScreenIndex(lastIndex);
-            locator<NavigationService>().navigateTo(BillTransRoute);
+            locator<NavigationService>().navigateTo(BillTransRoute, true);
           }
           return false;
         }

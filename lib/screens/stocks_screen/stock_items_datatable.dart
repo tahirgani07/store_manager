@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/screens/stocks_screen/stock_screen_alert_dialogs.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
@@ -14,9 +16,12 @@ class StockItemsDataTable extends StatefulWidget {
 class _StockItemsDataTableState extends State<StockItemsDataTable> {
   TextEditingController _searchController;
   List<Items> _searchList = [];
-  bool _sortDatatable = true;
   int _sortColumnIndex = 0;
   List<Items> _itemsList = [];
+
+  bool itemsColSortBool = false;
+  bool remainingColSortBool = false;
+  bool soldColSortBool = false;
 
   @override
   void initState() {
@@ -34,83 +39,164 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
   Widget build(BuildContext context) {
     _itemsList = Provider.of<List<Items>>(context) ?? [];
     String uid = Provider.of<User>(context).uid;
-    return Container(
-      margin: EdgeInsets.only(top: 10.0),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                "STOCK ITEMS",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+    return ResponsiveBuilder(builder: (context, sizingInfo) {
+      return Container(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            showOnlyForDesktop(
+              sizingInfo: sizingInfo,
+              widgetDesk: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Stock Items",
+                    style: CustomTextStyle.h1,
+                  ),
+                  SizedBox(width: 20),
+                  addSomethingButton(
+                    context: context,
+                    text: "Add an Item",
+                    onPressed: () => showAddItemDialog(context, uid),
+                  ),
+                ],
               ),
-              SizedBox(width: 20),
-              RaisedButton(
-                onPressed: () => showAddItemDialog(context, uid),
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                child: Text("ADD ITEM"),
-              ),
-            ],
-          ),
-          Container(
-            width: 400,
-            child: getSearchBar(_searchController, _onSearchTextChanged),
-          ),
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.all(10.0),
-              color: Colors.white,
-              child: Material(
-                elevation: 8.0,
-                child: SingleChildScrollView(
-                  child: DataTable(
-                    showCheckboxColumn: false,
-                    sortColumnIndex: _sortColumnIndex,
-                    sortAscending: _sortDatatable,
-                    columns: [
-                      DataColumn(
-                        label: Text('ITEM'),
-                        onSort: (i, b) => _itemsList = _onSortColumn(i, b),
-                      ),
-                      DataColumn(
-                        label: Text('SOLD'),
-                        onSort: (i, b) => _itemsList = _onSortColumn(i, b),
-                        numeric: true,
-                      ),
-                      DataColumn(
-                        label: Text('REMAINING'),
-                        onSort: (i, b) => _itemsList = _onSortColumn(i, b),
-                        numeric: true,
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 10),
+              width: sizingInfo.isDesktop ? 400 : double.infinity,
+              child: getSearchBar(_searchController, _onSearchTextChanged),
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                color: Colors.white,
+                child: Material(
+                  elevation: 8.0,
+                  child: Column(
+                    children: [
+                      _headerRow(),
+                      Expanded(
+                        child: _searchController.text.isNotEmpty
+                            ? _getDataRows(context, uid, _searchList)
+                            : _getDataRows(context, uid, _itemsList),
                       ),
                     ],
-                    rows: _searchController.text.isNotEmpty
-                        ? _getDataRows(context, uid, _searchList)
-                        : _getDataRows(context, uid, _itemsList),
                   ),
                 ),
               ),
             ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _headerRow() {
+    return Row(
+      children: [
+        _getFlexCotainerForHeader("ITEMS", 3, 0, itemsColSortBool),
+        _getFlexCotainerForHeader(
+          "SOLD",
+          2,
+          1,
+          soldColSortBool,
+          color: CustomColors.lightGrey,
+          alignment: Alignment.center,
+        ),
+        _getFlexCotainerForHeader(
+          "REMIANING",
+          2,
+          2,
+          remainingColSortBool,
+          alignment: Alignment.center,
+        ),
+      ],
+    );
+  }
+
+  _getFlexCotainerForHeader(
+    String title,
+    int flex,
+    int columnIndex,
+    bool columnsSortBool, {
+    double height = 40,
+    Alignment alignment,
+    Color color,
+  }) {
+    return Flexible(
+      flex: flex,
+      child: Container(
+        child: InkWell(
+          onTap: () {
+            _itemsList = _onSortColumn(columnIndex, columnsSortBool);
+          },
+          child: Container(
+            height: height,
+            alignment: alignment ?? Alignment.centerLeft,
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            decoration: BoxDecoration(
+              color: color,
+              border: Border(
+                bottom: BorderSide(color: Colors.grey, width: 0.5),
+              ),
+            ),
+            child: MarqueeWidget(
+              child: Row(
+                children: [
+                  Text(
+                    title,
+                    style: CustomTextStyle.grey_bold_small,
+                  ),
+                  SizedBox(width: 5),
+                  (_sortColumnIndex == columnIndex)
+                      ? Icon(
+                          (columnsSortBool)
+                              ? Icons.arrow_downward
+                              : Icons.arrow_upward,
+                          size: 16,
+                          color: Colors.grey[700],
+                        )
+                      : SizedBox(),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  List<DataRow> _getDataRows(
-      BuildContext context, String uid, List<Items> reqList) {
-    List<DataRow> temp = reqList
-        .map((item) => DataRow(
-              onSelectChanged: (b) =>
-                  showStockDetailsDialog(context, uid, item),
-              cells: [
-                DataCell(MarqueeWidget(child: Text("${item.name}"))),
-                DataCell(MarqueeWidget(child: Text("${item.stockSold}"))),
-                DataCell(MarqueeWidget(child: Text("${item.remainingStock}"))),
-              ],
+  Widget _getDataRows(BuildContext context, String uid, List<Items> reqList) {
+    // onSelectChanged: (b) =>
+    //     showStockDetailsDialog(context, uid, item),
+    List<dynamic> temp = [];
+    temp = reqList
+        .map((item) => InkWell(
+              onTap: () => showStockDetailsDialog(context, uid, item),
+              child: Row(
+                children: [
+                  getFlexContainer("${item.name}", 3),
+                  getFlexContainer(
+                    "${item.stockSold}",
+                    2,
+                    color: CustomColors.lightGrey,
+                    alignment: Alignment.centerRight,
+                  ),
+                  getFlexContainer(
+                    "${item.remainingStock}",
+                    2,
+                    alignment: Alignment.centerRight,
+                  ),
+                ],
+              ),
             ))
         .toList();
-    return temp ?? [];
+    return ListView.builder(
+        itemCount: temp.length,
+        itemBuilder: (context, counter) {
+          return temp[counter];
+        });
   }
 
   _onSearchTextChanged(String text) {
@@ -131,10 +217,24 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
   }
 
   List<Items> _onSortColumn(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      setState(() {
+        itemsColSortBool = !ascending;
+      });
+    } else if (columnIndex == 1) {
+      setState(() {
+        soldColSortBool = !ascending;
+      });
+    } else {
+      setState(() {
+        remainingColSortBool = !ascending;
+      });
+    }
+
     setState(() {
-      _sortDatatable = ascending;
       _sortColumnIndex = columnIndex;
     });
+
     List<Items> reqList =
         (_searchController.text.isEmpty) ? _itemsList : _searchList;
     if (ascending) {

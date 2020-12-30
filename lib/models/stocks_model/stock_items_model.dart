@@ -12,9 +12,9 @@ class ItemsModel {
       return Items(
         name: doc['name'],
         unit: doc['unit'],
-        pricePerUnit: doc['pricePerUnit'],
-        stockSold: doc['stockSold'],
-        remainingStock: doc['remainingStock'],
+        pricePerUnit: doc['pricePerUnit'].toDouble(),
+        stockSold: doc['stockSold'].toDouble(),
+        remainingStock: doc['remainingStock'].toDouble(),
         creationDate: doc['creationDate'],
       );
     }).toList();

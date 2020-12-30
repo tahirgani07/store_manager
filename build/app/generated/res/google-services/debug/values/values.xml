@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">618444958388-tck81ucm6b346snnjgstfq86g5tgcfnb.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://stock-manager-d7927.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">618444958388</string>
+    <string name="google_api_key" translatable="false">AIzaSyDEvZi0eO7x8g0oYa4c7hQKBNIWhfKSedA</string>
+    <string name="google_app_id" translatable="false">1:618444958388:android:e666df2655a571255e45e1</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDEvZi0eO7x8g0oYa4c7hQKBNIWhfKSedA</string>
+    <string name="google_storage_bucket" translatable="false">stock-manager-d7927.appspot.com</string>
+    <string name="project_id" translatable="false">stock-manager-d7927</string>
+</resources>

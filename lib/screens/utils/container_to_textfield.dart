@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
 import 'package:store_manager/screens/utils/decimal_input_text_formatter.dart';
-import 'package:store_manager/screens/utils/theme.dart';
 
 class ContainerToTextField extends StatefulWidget {
   final int counter;

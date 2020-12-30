@@ -2,11 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/locator.dart';
 import 'package:store_manager/models/customer_model/customer_model.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/customer_screen/customer_screen_alert_dialog.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
+import 'package:store_manager/screens/utils/navdrawer/collapsing_nav_drawer.dart';
 import 'package:store_manager/screens/utils/navdrawer/toggle_nav_bar.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:store_manager/services/navigation_service.dart';
@@ -31,8 +34,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigationModel = Provider.of<NavigationModel>(context, listen: false);
       int index = 2;
+
+      bool sameTab = navigationModel.currentScreenIndex == index;
+
       navigationModel.updateCurrentScreenIndex(index);
-      navigationModel.addToStack(index);
+
+      if (!sameTab) navigationModel.addToStack(index);
 
       /// Show NavBar
       toggleNavBar.updateShow(true);
@@ -64,42 +71,72 @@ class _CustomersScreenState extends State<CustomersScreen> {
           navigationModel.resetIndexStack();
           if (navigationModel.currentScreenIndex != lastIndex) {
             navigationModel.updateCurrentScreenIndex(lastIndex);
-            locator<NavigationService>().navigateTo(BillTransRoute);
+            locator<NavigationService>().navigateTo(BillTransRoute, true);
           }
           return false;
         }
       },
-      child: Scaffold(
-        body: Material(
-          color: bgColor,
-          elevation: 8.0,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      child: ResponsiveBuilder(builder: (context, sizingInfo) {
+        return Scaffold(
+          backgroundColor: CustomColors.bgBlue,
+          ///////////////////////// APP BAR
+          appBar: (!sizingInfo.isDesktop)
+              ? AppBar(
+                  title: Text("Customers"),
+                )
+              : null,
+          ////////////////////// DRAWER
+          drawer: (!sizingInfo.isDesktop)
+              ? CollapsingNavigationDrawer(
+                  onSelectTab: (routeName, sameTabPressed) {
+                    if (!sizingInfo.isDesktop) Navigator.pop(context);
+                    locator<NavigationService>()
+                        .navigateTo(routeName, sameTabPressed);
+                  },
+                )
+              : SizedBox(),
+          /////////////////////// BODY
+          body: Material(
+            elevation: 8.0,
+            child: Container(
+              margin: EdgeInsets.all(10),
+              child: Column(
                 children: [
-                  Text("CUSTOMERS LIST"),
-                  RaisedButton(
-                    onPressed: () => showAddCustomerDialog(context, uid),
-                    child: Text("ADD NEW CUSTOMER"),
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
+                  showOnlyForDesktop(
+                    sizingInfo: sizingInfo,
+                    widgetDesk: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Customers", style: CustomTextStyle.h1),
+                        addSomethingButton(
+                          context: context,
+                          text: "Add a Customer",
+                          onPressed: () => showAddCustomerDialog(context, uid),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10),
+                    child: getSearchBar(
+                      searchController,
+                      _onSearchTextChanged,
+                    ),
+                  ),
+                  _getHeaderRow(sizingInfo),
+                  Expanded(
+                    child: Container(
+                        child: (searchController.text.isNotEmpty)
+                            ? getListView(context, uid, _searchList, sizingInfo)
+                            : getListView(
+                                context, uid, _customersList, sizingInfo)),
                   ),
                 ],
               ),
-              getSearchBar(searchController, _onSearchTextChanged),
-              _getHeaderRow(),
-              Expanded(
-                child: Container(
-                    margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                    child: (searchController.text.isNotEmpty)
-                        ? getListView(context, uid, _searchList)
-                        : getListView(context, uid, _customersList)),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -123,7 +160,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
     });
   }
 
-  Widget getListView(BuildContext context, String uid, List<Customer> reqList) {
+  Widget getListView(BuildContext context, String uid, List<Customer> reqList,
+      SizingInformation sizingInfo) {
     return CupertinoScrollbar(
       thickness: 5,
       isAlwaysShown: true,
@@ -144,11 +182,28 @@ class _CustomersScreenState extends State<CustomersScreen> {
               child: Row(
                 children: [
                   getFlexContainer(
-                      "${reqList[counter].firstName} ${reqList[counter].lastName}",
-                      2),
-                  getFlexContainer(reqList[counter].email, 2),
-                  getFlexContainer(reqList[counter].phoneNo, 1),
-                  getFlexContainer(reqList[counter].birthDate, 1),
+                    "${reqList[counter].firstName} ${reqList[counter].lastName}",
+                    sizingInfo.isDesktop ? 2 : 3,
+                  ),
+                  showOnlyForDesktop(
+                    sizingInfo: sizingInfo,
+                    widgetDesk: getFlexContainer(
+                      reqList[counter].email,
+                      2,
+                      color: CustomColors.lightGrey,
+                    ),
+                  ),
+                  getFlexContainer(
+                    reqList[counter].phoneNo,
+                    sizingInfo.isDesktop ? 1 : 2,
+                    color:
+                        !sizingInfo.isDesktop ? CustomColors.lightGrey : null,
+                  ),
+                  getFlexContainer(
+                    reqList[counter].birthDate,
+                    sizingInfo.isDesktop ? 1 : 2,
+                    color: sizingInfo.isDesktop ? CustomColors.lightGrey : null,
+                  ),
                 ],
               ),
             ),
@@ -158,16 +213,39 @@ class _CustomersScreenState extends State<CustomersScreen> {
     );
   }
 
-  Widget _getHeaderRow() {
+  Widget _getHeaderRow(SizingInformation sizingInfo) {
     return Container(
-      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+      margin: EdgeInsets.only(top: 10),
       child: Material(
+        elevation: 8.0,
         child: Row(
           children: [
-            getFlexContainer("Name", 2, height: 57, textBold: true),
-            getFlexContainer("Email", 2, height: 57, textBold: true),
-            getFlexContainer("Phone No", 1, height: 57, textBold: true),
-            getFlexContainer("D.O.B", 1, height: 57, textBold: true),
+            getFlexContainer(
+              "Name",
+              sizingInfo.isDesktop ? 2 : 3,
+              header: true,
+            ),
+            showOnlyForDesktop(
+              sizingInfo: sizingInfo,
+              widgetDesk: getFlexContainer(
+                "Email",
+                2,
+                header: true,
+                color: CustomColors.lightGrey,
+              ),
+            ),
+            getFlexContainer(
+              "Phone No",
+              sizingInfo.isDesktop ? 1 : 2,
+              header: true,
+              color: !sizingInfo.isDesktop ? CustomColors.lightGrey : null,
+            ),
+            getFlexContainer(
+              "D.O.B",
+              sizingInfo.isDesktop ? 1 : 2,
+              header: true,
+              color: sizingInfo.isDesktop ? CustomColors.lightGrey : null,
+            ),
           ],
         ),
       ),

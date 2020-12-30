@@ -54,6 +54,10 @@ MaterialPageRoute getRouteWithProviders(
             ),
             StreamProvider<List<Bill>>.value(
               value: BillModel().fetchBillsDetails(uid),
+              catchError: (context, e) {
+                print(e);
+                return [];
+              },
             ),
             ChangeNotifierProvider(
               create: (context) => BillModel(),

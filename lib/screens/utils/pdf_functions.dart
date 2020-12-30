@@ -3,7 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:printing/printing.dart';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 import 'package:http/http.dart' as http;
 import 'package:store_manager/models/bills_model/bill_model.dart';
 
@@ -201,20 +201,22 @@ class PdfFunctions {
 
   Future writeAndSavePdf() async {
     await writeOnPdf();
+    final bytes = pdf.save();
+    String fileName = "$invoiceNo-$customerName-$invoiceDate.pdf";
     try {
       if (Platform.isAndroid || Platform.isIOS) {
-        Directory docDir = await getDownloadsDirectory();
-        print(docDir.path);
+        // final Directory docDir = await getApplicationDocumentsDirectory();
+        // final String path = "${docDir.path}/$fileName";
+        // Do nothing!!!
       }
     } catch (e) {
       /// Exception means that the platform is Web.
-      final bytes = pdf.save();
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.document.createElement('a') as html.AnchorElement
         ..href = url
         ..style.display = 'none'
-        ..download = "$invoiceNo-$customerName-$invoiceDate.pdf";
+        ..download = fileName;
       html.document.body.children.add(anchor);
       anchor.click();
       html.document.body.children.remove(anchor);
@@ -224,21 +226,12 @@ class PdfFunctions {
 
   Future writeAndPrintPdf() async {
     await writeOnPdf();
-    try {
-      if (Platform.isAndroid || Platform.isIOS) {
-        Directory docDir = await getDownloadsDirectory();
-        print(docDir.path);
-      }
-    } catch (e) {
-      /// Exception means that the platform is Web.
-      final bytes = pdf.save();
-      final blob = html.Blob([bytes], 'application/pdf');
-      final String url = html.Url.createObjectUrlFromBlob(blob);
-      http.Response response = await http.get(url);
-      var pdfData = response.bodyBytes;
-      await Printing.layoutPdf(
-          onLayout: (PdfPageFormat format) async => pdfData);
-    }
+    final bytes = pdf.save();
+    // final blob = html.Blob([bytes], 'application/pdf');
+    // final String url = html.Url.createObjectUrlFromBlob(blob);
+    // http.Response response = await http.get(url);
+    // var pdfData = response.bodyBytes;
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => bytes);
   }
 
   Future writeAndSaveAndPrintPdf() async {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:responsive_builder/responsive_builder.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/decimal_input_text_formatter.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
 
@@ -18,9 +20,6 @@ double pricePerUnitWidth = 140;
 double discountWidth = 140;
 double taxWidth = 180;
 double amountWidth = 112;
-
-//------------------------------------
-Color bgColor = Color(0xffE4E8EF);
 
 extension StringExtension on String {
   String get inCaps =>
@@ -63,6 +62,31 @@ Widget customTextField({
   );
 }
 
+Widget addSomethingButton(
+    {@required BuildContext context, String text, Function onPressed}) {
+  return RaisedButton(
+    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+    shape: RoundedRectangleBorder(
+      borderRadius: new BorderRadius.circular(30.0),
+    ),
+    onPressed: onPressed,
+    color: Colors.blue,
+    textColor: Colors.white,
+    child: Row(
+      children: [
+        CircleAvatar(
+          radius: 10,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.blue,
+          child: Icon(Icons.add, size: 18),
+        ),
+        SizedBox(width: 8),
+        Text(text ?? ""),
+      ],
+    ),
+  );
+}
+
 Widget alertActionButton({
   @required BuildContext context,
   String title,
@@ -77,68 +101,74 @@ Widget alertActionButton({
   );
 }
 
+showOnlyForDesktop({
+  @required SizingInformation sizingInfo,
+  @required Widget widgetDesk,
+  Widget widgetMob,
+}) {
+  if (sizingInfo.isDesktop) return widgetDesk;
+  if (widgetMob == null) return SizedBox();
+  return widgetMob;
+}
+
 Widget getSearchBar(
-    TextEditingController searchController, Function onSearchTextChanged) {
+  TextEditingController controller,
+  Function onSearchTextChanged,
+) {
   return Container(
-    color: Colors.grey,
-    child: new Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: new Card(
-        child: new ListTile(
-          dense: true,
-          leading: new Icon(Icons.search),
-          title: new TextField(
-            controller: searchController,
-            decoration: new InputDecoration(
-              hintText: 'Search',
-              border: InputBorder.none,
-              isDense: true,
-            ),
-            onChanged: onSearchTextChanged,
-          ),
-          trailing: (searchController.text.isEmpty)
-              ? null
-              : new IconButton(
-                  icon: new Icon(Icons.cancel),
-                  onPressed: () {
-                    searchController.clear();
-                    onSearchTextChanged('');
-                  },
-                ),
+    height: 35,
+    alignment: Alignment.center,
+    child: TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        // hintText: 'Search',
+        border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+        isDense: true,
+        prefixIcon: Container(
+          margin: EdgeInsets.symmetric(horizontal: 5.0),
+          child: Icon(Icons.search, size: 20),
         ),
+        prefixIconConstraints: BoxConstraints(maxWidth: 30, maxHeight: 30),
+        alignLabelWithHint: true,
       ),
+      style: TextStyle(
+        fontSize: 14,
+      ),
+      onChanged: onSearchTextChanged,
     ),
   );
 }
 
-Widget getFlexContainer(
+getFlexContainer(
   String title,
   int flex, {
-  bool border = true,
-  color,
-  double height = 50,
-  //height should be 57 for heading row
-  Alignment alignment = Alignment.centerLeft,
-  bool textBold = false,
-  bool greyText = false,
+  double height = 40,
+  Color color,
+  Alignment alignment,
+  bool header = false,
 }) {
   return Flexible(
     flex: flex,
     child: Container(
       height: height,
-      alignment: alignment,
+      alignment: alignment ?? Alignment.centerLeft,
       padding: EdgeInsets.symmetric(horizontal: 5.0),
       decoration: BoxDecoration(
-        border: border ? Border.all(color: Colors.grey) : null,
         color: color,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey, width: 0.5),
+        ),
       ),
       child: MarqueeWidget(
         child: Text(
           title,
-          style: TextStyle(
-            color: greyText ? Colors.grey.shade600 : null,
-            fontWeight: textBold ? FontWeight.w500 : null,
-          ),
+          style: (header)
+              ? CustomTextStyle.grey_bold_small
+              : TextStyle(
+                  fontSize: 13,
+                  color: CustomColors.darkBlue,
+                  fontWeight: FontWeight.bold,
+                ),
         ),
       ),
     ),

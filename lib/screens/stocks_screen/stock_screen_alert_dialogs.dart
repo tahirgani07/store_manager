@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/models/stocks_model/stock_trans_model.dart';
 import 'package:store_manager/models/unit_model.dart';
+import 'package:store_manager/screens/utils/barcode_gen.dart';
 import 'package:store_manager/screens/utils/loading_screen.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
@@ -144,16 +144,16 @@ Future<void> showStockDetailsDialog(
                   Text('Stock Sold- ${item.stockSold}'),
                 ],
               ),
-              SizedBox(
-                width: 20,
-              ),
-              Container(
-                height: 100,
-                width: 100,
-                child: QrImage(
-                  data: item.creationDate,
-                ),
-              ),
+              // SizedBox(
+              //   width: 20,
+              // ),
+              // Container(
+              //   height: 100,
+              //   width: 100,
+              //   child: QrImage(
+              //     data: item.creationDate,
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -168,13 +168,23 @@ Future<void> showStockDetailsDialog(
             },
           ),
           alertActionButton(
-              context: context,
-              title: "Reduce Stock",
-              color: Colors.yellow,
-              onPressed: () {
-                Navigator.of(context).pop();
-                updateStockDialog(context, uid, item, StockTransType.reduce);
-              }),
+            context: context,
+            title: "Reduce Stock",
+            color: Colors.yellow,
+            onPressed: () {
+              Navigator.of(context).pop();
+              updateStockDialog(context, uid, item, StockTransType.reduce);
+            },
+          ),
+          alertActionButton(
+            context: context,
+            title: "Get Qr",
+            color: Colors.yellow,
+            onPressed: () {
+              BarcodeGen(barcodeData: item.creationDate, itemName: item.name)
+                  .writeAndSavePdf();
+            },
+          ),
           alertActionButton(context: context),
         ],
       );

@@ -28,41 +28,14 @@ class LayoutTemplate extends StatelessWidget {
             builder: (context, _) {
               final ToggleNavBar toggleNavBar = context.watch<ToggleNavBar>();
               return Scaffold(
-                ///////////////////////// APP BAR
-                appBar: (!sizingInfo.isDesktop)
-                    ? AppBar(
-                        title: Text("Stock Manager"),
-                        leading: Builder(
-                          builder: (BuildContext context) {
-                            return IconButton(
-                                icon: const Icon(Icons.menu),
-                                onPressed: () {
-                                  Scaffold.of(context).openDrawer();
-                                });
-                          },
-                        ),
-                      )
-                    : null,
-                ////////////////////// DRAWER
-                drawer: (!sizingInfo.isDesktop)
-                    ? Builder(builder: (context) {
-                        return CollapsingNavigationDrawer(
-                          onSelectTab: (routeName) {
-                            if (!sizingInfo.isDesktop)
-                              Scaffold.of(context).openEndDrawer();
-                            locator<NavigationService>().navigateTo(routeName);
-                          },
-                        );
-                      })
-                    : SizedBox(),
                 ////////////////// BODY
                 body: Row(
                   children: [
                     (toggleNavBar.getShow() && sizingInfo.isDesktop)
                         ? CollapsingNavigationDrawer(
-                            onSelectTab: (routeName) {
+                            onSelectTab: (routeName, sameTabPressed) {
                               locator<NavigationService>()
-                                  .navigateTo(routeName);
+                                  .navigateTo(routeName, sameTabPressed);
                             },
                           )
                         : SizedBox(),

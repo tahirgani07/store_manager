@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/stocks_model/stock_trans_model.dart';
 import 'package:store_manager/models/unit_model.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
 
@@ -37,20 +38,23 @@ class _StockTransListState extends State<StockTransList> {
     _stockTransList = Provider.of<List<StockTrans>>(context) ?? [];
 
     return Container(
-      margin: EdgeInsets.only(top: 10.0),
+      margin: EdgeInsets.fromLTRB(0, 10, 10, 10),
       child: Column(
         children: [
           Text(
-            "STOCK TRANSACTIONS",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            "Stock Transactions",
+            style: CustomTextStyle.h1,
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: getSearchBar(_searchController, _onSearchTextChanged),
+          Container(
+            margin: EdgeInsets.only(top: 10),
+            child: getSearchBar(
+              _searchController,
+              _onSearchTextChanged,
+            ),
           ),
           Expanded(
             child: Container(
-              margin: EdgeInsets.fromLTRB(0, 10, 10, 10),
+              margin: EdgeInsets.only(top: 10),
               color: Colors.white,
               child: Material(
                 elevation: 8.0,
@@ -100,14 +104,24 @@ class _StockTransListState extends State<StockTransList> {
           itemBuilder: (context, counter) {
             return Row(
               children: [
-                getFlexContainer(transList[counter].type, 4),
-                getFlexContainer(transList[counter].itemName, 4),
                 getFlexContainer(
-                    formatter.format(DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(transList[counter].creationDate))),
+                  transList[counter].type,
+                  4,
+                ),
+                getFlexContainer(transList[counter].itemName, 4,
+                    color: CustomColors.lightGrey),
+                getFlexContainer(
+                    formatter.format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          int.parse(transList[counter].creationDate)),
+                    ),
                     4),
-                getFlexContainer(transList[counter].quantity.toString(), 3,
-                    alignment: Alignment.centerRight),
+                getFlexContainer(
+                  transList[counter].quantity.toString(),
+                  3,
+                  alignment: Alignment.centerRight,
+                  color: CustomColors.lightGrey,
+                ),
                 getFlexContainer(getShortForm(transList[counter].unit), 2),
               ],
             );
@@ -120,11 +134,33 @@ class _StockTransListState extends State<StockTransList> {
   Widget _getHeaderRow() {
     return Row(
       children: [
-        getFlexContainer("TYPE", 4, height: 57, textBold: true),
-        getFlexContainer("NAME", 4, height: 57, textBold: true),
-        getFlexContainer("DATE", 4, height: 57, textBold: true),
-        getFlexContainer("QTY UPDATED", 3, height: 57, textBold: true),
-        getFlexContainer("UNIT", 2, height: 57, textBold: true),
+        getFlexContainer(
+          "TYPE",
+          4,
+          header: true,
+        ),
+        getFlexContainer(
+          "NAME",
+          4,
+          header: true,
+          color: CustomColors.lightGrey,
+        ),
+        getFlexContainer(
+          "DATE",
+          4,
+          header: true,
+        ),
+        getFlexContainer(
+          "QTY UPDATED",
+          3,
+          header: true,
+          color: CustomColors.lightGrey,
+        ),
+        getFlexContainer(
+          "UNIT",
+          2,
+          header: true,
+        ),
       ],
     );
   }

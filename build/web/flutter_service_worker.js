@@ -3,11 +3,12 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "034261822764c839094b521793b2a09b",
+  "assets/AssetManifest.json": "ceb55eacc4c4a0757ae2450906006cf1",
 "assets/assets/fonts/Nunito-Black.ttf": "529509f5501c7f45315210d280a456d4",
 "assets/assets/fonts/Nunito-BlackItalic.ttf": "8bf9ce6e0c5434ca0ac97f90196d0c66",
 "assets/assets/fonts/Nunito-Bold.ttf": "c0844c990ecaaeb9f124758d38df4f3f",
 "assets/assets/fonts/Nunito-BoldItalic.ttf": "b21199decd37bf9a096e0f495bb20ffd",
+"assets/assets/fonts/Nunito-ExtraBold.ttf": "438598eadc302471a495b3133620f621",
 "assets/assets/fonts/Nunito-ExtraLight.ttf": "4470502486a612e2bf6f38d5bff77ce8",
 "assets/assets/fonts/Nunito-ExtraLightItalic.ttf": "ade1717e588935bdec3d38ca19bd1050",
 "assets/assets/fonts/Nunito-Italic.ttf": "380d3172fab0055a8d74ab12636f5a9b",
@@ -16,16 +17,16 @@ const RESOURCES = {
 "assets/assets/fonts/Nunito-Regular.ttf": "d8de52e6c5df1a987ef6b9126a70cfcc",
 "assets/assets/fonts/Nunito-SemiBold.ttf": "876701bc4fbf6166f07f152691b15159",
 "assets/assets/fonts/Nunito-SemiBoldItalic.ttf": "59cf0995782240777656a355cf08b234",
-"assets/FontManifest.json": "be4fbaef1ee4c05a2b05b69cbe5965b5",
+"assets/FontManifest.json": "11c618c7975d7febd0ea812cb1ca8eed",
 "assets/fonts/MaterialIcons-Regular.otf": "1288c9e28052e028aba623321f7826ac",
-"assets/NOTICES": "f712d04eb282ff00d99035cce0d88c95",
+"assets/NOTICES": "61a4eb74b7715bfe518669a0476c6f79",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "b14fcf3ee94e3ace300b192e9e7c8c5d",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "6f189157e82c64c502d1dfc1cda86029",
-"/": "6f189157e82c64c502d1dfc1cda86029",
-"main.dart.js": "677ec7ac427acfb64f3b62b2b518e6d6",
+"index.html": "3cd9640efeff56e9d5fc05d026d31152",
+"/": "3cd9640efeff56e9d5fc05d026d31152",
+"main.dart.js": "b1afb499c3166dbecd2affa2cc078cc2",
 "manifest.json": "0ae46400765f2dfe8760040cffc4b09d",
 "version.json": "481087fdd65d697d57a07bf78eeddc55"
 };
