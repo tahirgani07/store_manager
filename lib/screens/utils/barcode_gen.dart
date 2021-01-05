@@ -8,8 +8,18 @@ import 'package:pdf/pdf.dart';
 class BarcodeGen {
   final String itemName;
   final String barcodeData;
+  final String qty;
+  final String unit;
+  String fullBarcodeData;
 
-  BarcodeGen({this.barcodeData, this.itemName});
+  BarcodeGen({
+    this.barcodeData,
+    this.itemName,
+    this.qty,
+    this.unit,
+  }) {
+    this.fullBarcodeData = this.barcodeData + "-" + qty.toString();
+  }
 
   final pdf = pw.Document();
 
@@ -24,7 +34,7 @@ class BarcodeGen {
             return pw.Column(children: [
               pw.Expanded(
                 child: pw.BarcodeWidget(
-                  data: barcodeData,
+                  data: fullBarcodeData,
                   barcode: pw.Barcode.code128(),
                 ),
               ),
@@ -49,7 +59,7 @@ class BarcodeGen {
       final anchor = html.document.createElement('a') as html.AnchorElement
         ..href = url
         ..style.display = 'none'
-        ..download = "$itemName-barcode.pdf";
+        ..download = "$itemName-$qty-$unit-barcode.pdf";
       html.document.body.children.add(anchor);
       anchor.click();
       html.document.body.children.remove(anchor);

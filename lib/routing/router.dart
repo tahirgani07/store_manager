@@ -9,9 +9,9 @@ import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/add_bill_screen.dart';
 import 'package:store_manager/screens/billing_screen/bill_main_screen.dart';
 import 'package:store_manager/screens/customer_screen/customers_screen.dart';
+import 'package:store_manager/screens/settings_screen/settings_screen.dart';
 import 'package:store_manager/screens/stocks_screen/stock_trans_list.dart';
 import 'package:store_manager/screens/stocks_screen/stocks_screen.dart';
-import 'package:store_manager/screens/utils/error_screen.dart';
 
 Route<dynamic> generateRoute(String uid, RouteSettings settings) {
   switch (settings.name) {
@@ -22,14 +22,17 @@ Route<dynamic> generateRoute(String uid, RouteSettings settings) {
     case StocksRoute:
       return getRouteWithProviders(uid, StocksScreen(), settings.name);
     case StockTransRoute:
-      return getRouteWithProviders(uid, StockTransList(), settings.name);
+      return getRouteWithProviders(
+          uid, StockTransList(fullScreen: true), settings.name);
     case CustomersRoute:
       return getRouteWithProviders(uid, CustomersScreen(), settings.name);
-    default:
+    case SettingsRoute:
       return MaterialPageRoute(
-        settings: RouteSettings(name: "/error"),
-        builder: (_) => ErrorScreen(),
+        settings: RouteSettings(name: settings.name),
+        builder: (context) => SettingsScreen(),
       );
+    default:
+      return getRouteWithProviders(uid, BillMainScreen(), BillTransRoute);
   }
 }
 
@@ -42,9 +45,6 @@ MaterialPageRoute getRouteWithProviders(
           providers: [
             StreamProvider<List<Items>>.value(
               value: ItemsModel().fetchItems(uid),
-              /*catchError: (context, obj) {
-                              return [];
-                            },*/
             ),
             StreamProvider<List<StockTrans>>.value(
               value: StockTransModel().fetchStockTransactions(uid),
@@ -54,10 +54,6 @@ MaterialPageRoute getRouteWithProviders(
             ),
             StreamProvider<List<Bill>>.value(
               value: BillModel().fetchBillsDetails(uid),
-              catchError: (context, e) {
-                print(e);
-                return [];
-              },
             ),
             ChangeNotifierProvider(
               create: (context) => BillModel(),

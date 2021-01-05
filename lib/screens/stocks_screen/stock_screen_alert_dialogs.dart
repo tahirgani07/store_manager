@@ -178,17 +178,70 @@ Future<void> showStockDetailsDialog(
           ),
           alertActionButton(
             context: context,
-            title: "Get Qr",
+            title: "Get Barcode",
             color: Colors.yellow,
             onPressed: () {
-              BarcodeGen(barcodeData: item.creationDate, itemName: item.name)
-                  .writeAndSavePdf();
+              getQrQuantityDialog(context, uid, item);
             },
           ),
           alertActionButton(context: context),
         ],
       );
     },
+  );
+}
+
+//-----------------Get Qr Quantity Dailog--------------------------
+Future<void> getQrQuantityDialog(BuildContext context, String uid, Items item) {
+  TextEditingController controller = TextEditingController();
+  bool showError = false;
+  return showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(builder: (context, setState) {
+      return AlertDialog(
+        title: Text("Add Quantity"),
+        content: SingleChildScrollView(
+          child: Container(
+            width: 500,
+            child: Column(
+              children: [
+                showError
+                    ? Text(
+                        "This Field Cannot be empty",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    : SizedBox(),
+                customTextField(
+                  controller: controller,
+                  autofocus: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          alertActionButton(
+              context: context,
+              color: Colors.blue,
+              title: "Get Barcode",
+              onPressed: () {
+                if (controller.text.isEmpty) {
+                  setState(() {
+                    showError = true;
+                  });
+                  return;
+                }
+                BarcodeGen(
+                  barcodeData: item.creationDate,
+                  itemName: item.name,
+                  qty: controller.text,
+                  unit: item.unit,
+                ).writeAndSavePdf();
+                Navigator.pop(context);
+              }),
+        ],
+      );
+    }),
   );
 }
 

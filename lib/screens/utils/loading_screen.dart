@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class LoadingScreen extends StatelessWidget {
   final String message;
+  final Color textColor;
 
-  const LoadingScreen({Key key, this.message}) : super(key: key);
+  const LoadingScreen({this.message, this.textColor});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -13,7 +14,7 @@ class LoadingScreen extends StatelessWidget {
         children: [
           CircularProgressIndicator(),
           SizedBox(height: 10),
-          Text(message),
+          Text(message, style: TextStyle(color: textColor ?? Colors.black)),
         ],
       ),
     );

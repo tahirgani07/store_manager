@@ -79,6 +79,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
       child: ResponsiveBuilder(builder: (context, sizingInfo) {
         return Scaffold(
           backgroundColor: CustomColors.bgBlue,
+          floatingActionButton: showOnlyForDesktop(
+            sizingInfo: sizingInfo,
+            widgetDesk: SizedBox(),
+            widgetMob: FloatingActionButton(
+              tooltip: "Add a New Customer",
+              child: Text("+", style: CustomTextStyle.bigIcons),
+              onPressed: () => showAddCustomerDialog(context, uid),
+            ),
+          ),
           ///////////////////////// APP BAR
           appBar: (!sizingInfo.isDesktop)
               ? AppBar(
@@ -170,7 +179,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         controller: _scrollController,
         itemCount: reqList.length,
         itemBuilder: (context, counter) {
-          return Material(
+          Widget temp = Material(
             elevation: 8.0,
             child: InkWell(
               hoverColor: Colors.grey.shade200,
@@ -208,6 +217,14 @@ class _CustomersScreenState extends State<CustomersScreen> {
               ),
             ),
           );
+
+          if (counter == reqList.length - 1) {
+            return Container(
+              margin: EdgeInsets.only(bottom: 70),
+              child: temp,
+            );
+          }
+          return temp;
         },
       ),
     );

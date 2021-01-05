@@ -50,13 +50,14 @@ class _CollapsingNavigationDrawerState extends State<CollapsingNavigationDrawer>
               color: drawerBgColor,
               child: Column(
                 children: [
+                  SizedBox(height: 12),
                   CollapsingListTile(
                     isUsernameTile: true,
                     title: "$name",
                     icon: Icons.person,
                     animationController: _animationController,
                   ),
-                  Divider(height: 50, color: Colors.white70, thickness: 0.3),
+                  Divider(height: 30, color: Colors.white70, thickness: 0.3),
                   Expanded(
                     child: Consumer<NavigationModel>(
                         builder: (context, navigationModel, _) {

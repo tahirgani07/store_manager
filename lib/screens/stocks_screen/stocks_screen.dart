@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -5,6 +6,7 @@ import 'package:store_manager/locator.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/stocks_screen/stock_items_datatable.dart';
+import 'package:store_manager/screens/stocks_screen/stock_screen_alert_dialogs.dart';
 import 'package:store_manager/screens/stocks_screen/stock_trans_list.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/navdrawer/collapsing_nav_drawer.dart';
@@ -43,6 +45,7 @@ class _StocksScreenState extends State<StocksScreen> {
   @override
   Widget build(BuildContext context) {
     toggleNavBar = Provider.of<ToggleNavBar>(context);
+    String uid = Provider.of<User>(context).uid;
 
     return WillPopScope(
       onWillPop: () async {
@@ -65,10 +68,40 @@ class _StocksScreenState extends State<StocksScreen> {
         builder: (context, sizingInfo) {
           return Scaffold(
             backgroundColor: CustomColors.bgBlue,
+            floatingActionButton: showOnlyForDesktop(
+              sizingInfo: sizingInfo,
+              widgetDesk: SizedBox(),
+              widgetMob: FloatingActionButton(
+                tooltip: "Add a New Item",
+                child: Text("+", style: CustomTextStyle.bigIcons),
+                onPressed: () => showAddItemDialog(context, uid),
+              ),
+            ),
             ///////////////////////// APP BAR
             appBar: (!sizingInfo.isDesktop)
                 ? AppBar(
                     title: Text("Stocks"),
+                    actions: [
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: FlatButton(
+                          onPressed: () => locator<NavigationService>()
+                              .navigateTo(StockTransRoute, false),
+                          child: Text(
+                            "View Stock Transactions",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          color: Colors.white,
+                          textColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20))),
+                        ),
+                      ),
+                    ],
                   )
                 : null,
             ////////////////////// DRAWER

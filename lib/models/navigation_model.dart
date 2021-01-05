@@ -10,7 +10,8 @@ List<NavigationModel> navigationItems = [
       title: "Customers",
       icon: Icons.person_add_alt,
       routeName: CustomersRoute),
-  NavigationModel(title: "Settings", icon: Icons.settings, routeName: ""),
+  NavigationModel(
+      title: "Settings", icon: Icons.settings, routeName: SettingsRoute),
 ];
 
 class NavigationModel extends ChangeNotifier {

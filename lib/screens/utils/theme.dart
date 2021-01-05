@@ -36,14 +36,22 @@ Widget customTextField({
   bool autofocus = false,
   bool readOnly = false,
   Function onTap,
+  Function(String) onChanged,
   bool numeric = false,
   String name = "",
+  TextStyle textStyle,
+  TextAlign textAlign,
+  EdgeInsetsGeometry contentPadding,
+  bool noMargin = false,
+  bool enabled = true,
 }) {
   return Container(
-    margin: EdgeInsets.all(10.0),
+    margin: noMargin ? EdgeInsets.zero : EdgeInsets.all(10.0),
     child: TextField(
       readOnly: readOnly,
       onTap: onTap,
+      enabled: enabled,
+      onChanged: onChanged,
       autofocus: autofocus,
       controller: controller,
       inputFormatters: (numeric)
@@ -56,8 +64,11 @@ Widget customTextField({
         labelText: label,
         isDense: true,
         alignLabelWithHint: true,
+        contentPadding: contentPadding,
       ),
+      textAlign: textAlign ?? TextAlign.start,
       maxLines: maxLines,
+      style: textStyle,
     ),
   );
 }
@@ -123,6 +134,7 @@ Widget getSearchBar(
       decoration: InputDecoration(
         // hintText: 'Search',
         border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+        contentPadding: EdgeInsets.symmetric(vertical: 13),
         isDense: true,
         prefixIcon: Container(
           margin: EdgeInsets.symmetric(horizontal: 5.0),
@@ -172,5 +184,43 @@ getFlexContainer(
         ),
       ),
     ),
+  );
+}
+
+Widget noDataContainer({
+  String title = "",
+  String message = "",
+  String imgName = "undraw_empty",
+  double topForText = 10,
+}) {
+  return Stack(
+    alignment: Alignment.center,
+    children: [
+      Image.asset(
+        "assets/images/$imgName.png",
+        fit: BoxFit.contain,
+      ),
+      Positioned(
+        top: topForText,
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 30,
+                color: CustomColors.darkBlue,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              message,
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    ],
   );
 }

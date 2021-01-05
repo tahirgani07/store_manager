@@ -64,7 +64,7 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
             ),
             Container(
               margin: EdgeInsets.only(top: 10),
-              width: sizingInfo.isDesktop ? 400 : double.infinity,
+              width: double.infinity,
               child: getSearchBar(_searchController, _onSearchTextChanged),
             ),
             Expanded(
@@ -195,6 +195,12 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
     return ListView.builder(
         itemCount: temp.length,
         itemBuilder: (context, counter) {
+          if (counter == temp.length - 1) {
+            return Container(
+              margin: EdgeInsets.only(bottom: 70),
+              child: temp[counter],
+            );
+          }
           return temp[counter];
         });
   }

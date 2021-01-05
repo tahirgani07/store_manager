@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "assets/AssetManifest.json": "ceb55eacc4c4a0757ae2450906006cf1",
+  "assets/AssetManifest.json": "fbc14bd0a9faf7cea7c3d7291bf12a28",
 "assets/assets/fonts/Nunito-Black.ttf": "529509f5501c7f45315210d280a456d4",
 "assets/assets/fonts/Nunito-BlackItalic.ttf": "8bf9ce6e0c5434ca0ac97f90196d0c66",
 "assets/assets/fonts/Nunito-Bold.ttf": "c0844c990ecaaeb9f124758d38df4f3f",
@@ -17,6 +17,8 @@ const RESOURCES = {
 "assets/assets/fonts/Nunito-Regular.ttf": "d8de52e6c5df1a987ef6b9126a70cfcc",
 "assets/assets/fonts/Nunito-SemiBold.ttf": "876701bc4fbf6166f07f152691b15159",
 "assets/assets/fonts/Nunito-SemiBoldItalic.ttf": "59cf0995782240777656a355cf08b234",
+"assets/assets/images/undraw_empty.png": "bf6582eafe98be385c1767924162ddd3",
+"assets/assets/images/undraw_no_data.png": "d83c1ae09a5bf6ba6420a1609fde3058",
 "assets/FontManifest.json": "11c618c7975d7febd0ea812cb1ca8eed",
 "assets/fonts/MaterialIcons-Regular.otf": "1288c9e28052e028aba623321f7826ac",
 "assets/NOTICES": "61a4eb74b7715bfe518669a0476c6f79",
@@ -24,9 +26,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "3cd9640efeff56e9d5fc05d026d31152",
-"/": "3cd9640efeff56e9d5fc05d026d31152",
-"main.dart.js": "b1afb499c3166dbecd2affa2cc078cc2",
+"index.html": "c20e1f9c51eb8c7a2e7cc7f6bcc08cdc",
+"/": "c20e1f9c51eb8c7a2e7cc7f6bcc08cdc",
+"main.dart.js": "0b8ba2d433c5f64697376bda979023be",
 "manifest.json": "0ae46400765f2dfe8760040cffc4b09d",
 "version.json": "481087fdd65d697d57a07bf78eeddc55"
 };

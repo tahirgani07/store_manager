@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/stocks_model/stock_trans_model.dart';
 import 'package:store_manager/models/unit_model.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
@@ -8,6 +9,10 @@ import 'package:store_manager/screens/utils/theme.dart';
 import 'package:intl/intl.dart';
 
 class StockTransList extends StatefulWidget {
+  final bool fullScreen;
+
+  const StockTransList({this.fullScreen = false});
+
   @override
   _StockTransListState createState() => _StockTransListState();
 }
@@ -37,40 +42,54 @@ class _StockTransListState extends State<StockTransList> {
   Widget build(BuildContext context) {
     _stockTransList = Provider.of<List<StockTrans>>(context) ?? [];
 
-    return Container(
-      margin: EdgeInsets.fromLTRB(0, 10, 10, 10),
-      child: Column(
-        children: [
-          Text(
-            "Stock Transactions",
-            style: CustomTextStyle.h1,
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 10),
-            child: getSearchBar(
-              _searchController,
-              _onSearchTextChanged,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(top: 10),
-              color: Colors.white,
-              child: Material(
-                elevation: 8.0,
-                child: Column(
-                  children: [
-                    _getHeaderRow(),
-                    (_searchController.text.isNotEmpty)
-                        ? _getStockTransList(context, _searchList)
-                        : _getStockTransList(context, _stockTransList),
-                  ],
-                ),
+    Widget temp = ResponsiveBuilder(builder: (context, sizingInfo) {
+      return Container(
+        margin: EdgeInsets.fromLTRB(!widget.fullScreen ? 0 : 10, 10, 10, 10),
+        child: Column(
+          children: [
+            showOnlyForDesktop(
+              sizingInfo: sizingInfo,
+              widgetDesk: Text(
+                "Stock Transactions",
+                style: CustomTextStyle.h1,
               ),
             ),
-          )
-        ],
+            Container(
+              margin: EdgeInsets.only(top: 10),
+              child: getSearchBar(
+                _searchController,
+                _onSearchTextChanged,
+              ),
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 10),
+                color: Colors.white,
+                child: Material(
+                  elevation: 8.0,
+                  child: Column(
+                    children: [
+                      _getHeaderRow(),
+                      (_searchController.text.isNotEmpty)
+                          ? _getStockTransList(context, _searchList)
+                          : _getStockTransList(context, _stockTransList),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    });
+
+    if (!widget.fullScreen) return temp;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Stock Transactions"),
       ),
+      body: temp,
     );
   }
 

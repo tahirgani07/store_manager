@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
 import 'package:store_manager/models/unit_model.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 class UnitDropDownTextField extends StatefulWidget {
@@ -128,18 +129,27 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
                   focusNode: focusNode,
                   controller: searchUnitController,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                        gapPadding: 0, borderRadius: BorderRadius.zero),
                     isDense: true,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   ),
+                  style: CustomTextStyle.blue_bold_med,
+                  maxLines: 1,
                   onChanged: _onSearchTextChanged,
                   textInputAction: TextInputAction.next,
                   onSubmitted: (_) => focusNode.unfocus(),
                 ),
               )
-            : ListTile(
-                title: Text(_offlineBillItemsModel
-                    .getOfflineBillItem(widget.counter)
-                    .unit),
+            : Container(
+                child: Text(
+                  _offlineBillItemsModel
+                      .getOfflineBillItem(widget.counter)
+                      .unit,
+                  style: CustomTextStyle.blue_bold_med,
+                ),
+                alignment: Alignment.centerLeft,
               ),
       ),
     );
@@ -167,7 +177,9 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
           child: Material(
             elevation: 8.0,
             child: Container(
-              height: (listLength > 4) ? 4 * height : listLength * height,
+              height: (listLength > 4)
+                  ? 4 * (height + 10)
+                  : listLength * (height + 10),
               child: (searchUnitController.text.isNotEmpty)
                   ? _getList(_searchList)
                   : _getList(unitsList),
@@ -190,9 +202,12 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
               focusNode.unfocus();
             },
             child: Container(
-              height: height,
-              child: ListTile(
-                title: Text("$name ($shortName)"),
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              height: (height + 10),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "$name ($shortName)",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           );

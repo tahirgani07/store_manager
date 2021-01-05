@@ -28,4 +28,15 @@ class DatabaseService {
   CollectionReference getRefToBillsCollection(String uid) {
     return _db.collection("users").doc(uid).collection("bills");
   }
+
+  DocumentReference getRefToUsersDocument(String uid) {
+    return _db.collection("users").doc(uid);
+  }
+
+  Future<DocumentSnapshot> fetchPersonalDetail(String uid) async {
+    DatabaseService databaseService = DatabaseService();
+    DocumentSnapshot snapshot =
+        await databaseService.getRefToUsersDocument(uid).get();
+    return snapshot;
+  }
 }

@@ -10,8 +10,8 @@ class BillModel extends ChangeNotifier {
   bool getUnitReadOnlyinBillItem(int index) =>
       unitReadOnlyListinBillItem[index];
 
-  addNewUnitReadOnlyinBillItem() {
-    unitReadOnlyListinBillItem.add(false);
+  addNewUnitReadOnlyinBillItem({bool value = false}) {
+    unitReadOnlyListinBillItem.add(value);
     notifyListeners();
   }
 
@@ -38,6 +38,8 @@ class BillModel extends ChangeNotifier {
         finalAmt: doc['finalAmt'].toDouble(),
         amtPaid: doc['amtPaid'].toDouble(),
         amtBalance: doc['amtBalance'].toDouble(),
+        paymentType: doc['paymentType'],
+        changeAmt: doc['changeAmt'],
       );
     }).toList();
   }
@@ -63,8 +65,10 @@ class BillModel extends ChangeNotifier {
     double finalAmt = 0,
     double amtPaid = 0,
     double amtBalance = 0,
+    double changeAmt = 0,
     List<Items> stockItemsToUpdate,
     List<double> stockItemsQtyToUpdate,
+    String paymentType,
   }) async {
     bool success = true;
     String creationDate = DateTime.now().millisecondsSinceEpoch.toString();
@@ -80,6 +84,8 @@ class BillModel extends ChangeNotifier {
       'invoiceDate': creationDate,
       'amtPaid': amtPaid,
       'amtBalance': amtBalance,
+      'paymentType': paymentType,
+      'changeAmt': changeAmt,
     }).catchError((e) {
       success = false;
       print(e.toString());
@@ -129,6 +135,8 @@ class Bill {
   final double finalAmt;
   final double amtPaid;
   final double amtBalance;
+  final double changeAmt;
+  final String paymentType;
 
   Bill({
     this.customerId,
@@ -142,6 +150,8 @@ class Bill {
     this.finalAmt,
     this.amtPaid,
     this.amtBalance,
+    this.changeAmt,
+    this.paymentType,
   });
 }
 

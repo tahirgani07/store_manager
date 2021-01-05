@@ -1,19 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/bills_model/bill_model.dart';
+import 'package:store_manager/models/database_service.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:store_manager/screens/utils/pdf_functions.dart';
 
-class DisplayBill extends StatelessWidget {
+class DisplayBill extends StatefulWidget {
   final Bill bill;
 
   DisplayBill({this.bill});
 
+  @override
+  _DisplayBillState createState() => _DisplayBillState();
+}
+
+class _DisplayBillState extends State<DisplayBill> {
   final DateFormat formatter = DateFormat("dd/MM/yyyy");
+  DocumentSnapshot personalDoc;
+  String uid = "";
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      DatabaseService databaseService = DatabaseService();
+      personalDoc = await databaseService.fetchPersonalDetail(uid);
+    });
+    super.initState();
+  }
 
   Widget build(BuildContext context) {
+    uid = Provider.of<User>(context).uid;
     return Scaffold(
       appBar: AppBar(
         title: Text("Display Bill"),
@@ -22,13 +43,16 @@ class DisplayBill extends StatelessWidget {
             width: 100,
             child: IconButton(
               onPressed: () async => PdfFunctions(
-                billItemsList: bill.billItemsList,
-                invoiceDate: bill.invoiceDate,
-                invoiceNo: int.parse(bill.invoiceNo),
-                customerName: bill.customerName,
-                totalAmt: bill.finalAmt,
-                amtBalance: bill.amtPaid,
-                amtReceived: bill.amtBalance,
+                paymentType: widget.bill.paymentType,
+                companyName: personalDoc["companyName"],
+                companyPhoneNo: personalDoc["phoneNo"],
+                billItemsList: widget.bill.billItemsList,
+                invoiceDate: widget.bill.invoiceDate,
+                invoiceNo: int.parse(widget.bill.invoiceNo),
+                customerName: widget.bill.customerName,
+                totalAmt: widget.bill.finalAmt,
+                amtBalance: widget.bill.amtPaid,
+                amtReceived: widget.bill.amtBalance,
               ).writeAndPrintPdf(),
               icon: CircleAvatar(child: Icon(Icons.download_rounded)),
               color: Colors.white,
@@ -52,7 +76,7 @@ class DisplayBill extends StatelessWidget {
                       style: CustomTextStyle.bold_med,
                     ),
                     Text(
-                      "${bill.customerName}",
+                      "${widget.bill.customerName}",
                       style: CustomTextStyle.blue_bold_med,
                     ),
                   ],
@@ -67,7 +91,7 @@ class DisplayBill extends StatelessWidget {
                           style: CustomTextStyle.bold_med,
                         ),
                         Text(
-                          "${bill.invoiceNo}",
+                          "${widget.bill.invoiceNo}",
                           style: CustomTextStyle.blue_bold_med,
                         ),
                       ],
@@ -79,7 +103,7 @@ class DisplayBill extends StatelessWidget {
                           style: CustomTextStyle.bold_med,
                         ),
                         Text(
-                          "${formatter.format(DateTime.fromMillisecondsSinceEpoch(int.parse(bill.invoiceDate)))},",
+                          "${formatter.format(DateTime.fromMillisecondsSinceEpoch(int.parse(widget.bill.invoiceDate)))},",
                           style: CustomTextStyle.blue_bold_med,
                         ),
                       ],
@@ -92,11 +116,11 @@ class DisplayBill extends StatelessWidget {
             itemListHeader(),
             Expanded(
               child: ListView.builder(
-                itemCount: bill.billItemsList.length,
+                itemCount: widget.bill.billItemsList.length,
                 itemBuilder: (context, counter) {
                   return _getItemsRow(
                     counter: counter,
-                    billItem: bill.billItemsList[counter],
+                    billItem: widget.bill.billItemsList[counter],
                   );
                 },
               ),
@@ -118,7 +142,7 @@ class DisplayBill extends StatelessWidget {
             Text("Total: ", style: TextStyle(fontSize: 15)),
             SizedBox(width: 10),
             Text(
-              "₹ ${bill.finalAmt.toStringAsFixed(2)}",
+              "₹ ${widget.bill.finalAmt.toStringAsFixed(2)}",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 25,

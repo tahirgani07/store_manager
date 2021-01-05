@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/decimal_input_text_formatter.dart';
 
 class ContainerToTextField extends StatefulWidget {
@@ -102,9 +103,13 @@ class _ContainerToTextFieldState extends State<ContainerToTextField> {
                 readOnly: widget.readOnly,
                 textAlign: (widget.numeric) ? TextAlign.end : TextAlign.start,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                      gapPadding: 0, borderRadius: BorderRadius.zero),
                   isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 10),
                 ),
+                style: CustomTextStyle.blue_bold_med,
+                maxLines: 1,
                 inputFormatters: [
                   (widget.numeric)
                       ? DecimalTextInputFormatter(decimalRange: 4)
@@ -116,11 +121,9 @@ class _ContainerToTextFieldState extends State<ContainerToTextField> {
                   focusNode.unfocus();
                 },
               )
-            : ListTile(
-                title: Container(
-                  child: Text(value),
-                  alignment: Alignment.centerRight,
-                ),
+            : Container(
+                child: Text(value, style: CustomTextStyle.blue_bold_med),
+                alignment: Alignment.centerRight,
               ),
       ),
     );

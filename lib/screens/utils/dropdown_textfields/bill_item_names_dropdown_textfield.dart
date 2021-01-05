@@ -6,6 +6,7 @@ import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/models/unit_model.dart';
 import 'package:store_manager/screens/stocks_screen/stock_screen_alert_dialogs.dart';
+import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 
 class BillItemNameDropDownTextField extends StatefulWidget {
   final double addWidth;
@@ -103,16 +104,25 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
                   focusNode: focusNode,
                   controller: nameController,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                        gapPadding: 0, borderRadius: BorderRadius.zero),
                     isDense: true,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   ),
+                  style: CustomTextStyle.blue_bold_med,
+                  maxLines: 1,
                   onChanged: _onSearchTextChanged,
                   textInputAction: TextInputAction.next,
                   onSubmitted: (_) => focusNode.unfocus(),
                 ),
               )
-            : ListTile(
-                title: Text(currentOfflineBillItem.name),
+            : Container(
+                child: Text(
+                  currentOfflineBillItem.name,
+                  style: CustomTextStyle.blue_bold_med,
+                ),
+                alignment: Alignment.centerLeft,
               ),
       ),
     );
@@ -143,7 +153,9 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
             child: Material(
               elevation: 8.0,
               child: Container(
-                height: (listLength > 4) ? 4 * height : listLength * height,
+                height: (listLength > 4)
+                    ? 4 * (height + 10)
+                    : listLength * (height + 10),
                 child: (nameController.text.isNotEmpty)
                     ? _getList(_searchList)
                     : _getList(widget.itemsList),
@@ -168,9 +180,12 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
                     _searchItemAndSetFields(name);
                   },
                   child: Container(
-                    height: height,
-                    child: ListTile(
-                      title: Text(name),
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    height: (height + 10),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      name,
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 )
@@ -180,7 +195,7 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
 
   Widget _addNewItemListTile() {
     return Container(
-      height: height,
+      height: (height + 10),
       child: ListTile(
         title: RaisedButton(
             child: Text("Add New Item"),
@@ -238,7 +253,7 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
         widget.counter,
         name: item.name,
         unit: getShortForm(item.unit),
-        qty: 1,
+        // qty: 1,
         pricePerUnit: item.pricePerUnit,
       );
       billModel.changeUnitReadOnlyListinBillItem(widget.counter, true);

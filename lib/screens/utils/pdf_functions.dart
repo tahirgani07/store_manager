@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -15,17 +16,23 @@ class PdfFunctions {
   final double totalAmt;
   final double amtReceived;
   final double amtBalance;
+  final String companyName;
+  final String companyPhoneNo;
+  final String paymentType;
 
   final pdf = pw.Document();
 
   PdfFunctions({
+    @required this.companyName,
+    @required this.companyPhoneNo,
     this.billItemsList,
     this.invoiceNo,
     this.invoiceDate,
-    this.customerName,
-    this.totalAmt,
-    this.amtReceived,
-    this.amtBalance,
+    this.customerName = "",
+    this.totalAmt = 0,
+    this.amtReceived = 0,
+    this.amtBalance = 0,
+    this.paymentType,
   });
   writeOnPdf() {
     int counter = 0;
@@ -108,11 +115,11 @@ class PdfFunctions {
                 children: [
                   pw.Align(
                     alignment: pw.Alignment.centerLeft,
-                    child: pw.Text("COMPANY NAME"),
+                    child: pw.Text("$companyName"),
                   ),
                   pw.Align(
                     alignment: pw.Alignment.centerLeft,
-                    child: pw.Text("Phone No: 9999999999"),
+                    child: pw.Text("Phone No: $companyPhoneNo"),
                   ),
                   ////////////////////////
                   pw.SizedBox(height: 10),
@@ -184,11 +191,17 @@ class PdfFunctions {
                             pw.Text("Rs. $amtBalance"),
                           ],
                         ),
+                        // Payment Type
+                        pw.Row(
+                          children: [
+                            pw.Text("Payment With: $paymentType"),
+                          ],
+                        ),
                         ///////// Divider
                         pw.Divider(),
                         ///////////////
                         pw.SizedBox(height: 5),
-                        pw.Text("For CompanyName"),
+                        pw.Text("For $companyName"),
                       ],
                     ),
                   ),

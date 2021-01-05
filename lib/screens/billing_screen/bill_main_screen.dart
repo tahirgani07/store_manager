@@ -9,6 +9,7 @@ import 'package:store_manager/models/database_service.dart';
 import 'package:store_manager/models/navigation_model.dart';
 import 'package:store_manager/routing/route_names.dart';
 import 'package:store_manager/screens/billing_screen/display_bill.dart';
+import 'package:store_manager/screens/billing_screen/personal_details_alert_dialog.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
 import 'package:store_manager/screens/utils/marquee_widget.dart';
 import 'package:store_manager/screens/utils/navdrawer/collapsing_nav_drawer.dart';
@@ -47,6 +48,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
 
   NavigationModel navigationModel;
   ToggleNavBar toggleNavBar;
+  DocumentSnapshot personalDoc;
 
   @override
   void initState() {
@@ -55,7 +57,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
     endDateController = TextEditingController();
     searchController = TextEditingController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       navigationModel = Provider.of<NavigationModel>(context, listen: false);
       int index = 0;
       bool sameTab = navigationModel.currentScreenIndex == index;
@@ -66,6 +68,19 @@ class _BillMainScreenState extends State<BillMainScreen> {
 
       /// show NavBar
       toggleNavBar.updateShow(true);
+
+      ///////////////////////////////
+      DatabaseService databaseService = DatabaseService();
+      personalDoc = await databaseService.fetchPersonalDetail(uid);
+      try {
+        // THIS IS USED TO CHECK WHETHER THE FIELD EXISTS OR NOT.
+        // DO NOT REMOVE
+        // ignore: unused_local_variable
+        String name = personalDoc["firstName"];
+      } catch (e) {
+        toggleNavBar.updateShow(false);
+        showPersonalDetailsAlertDialog(context, uid);
+      }
     });
     super.initState();
   }
@@ -364,7 +379,11 @@ class _BillMainScreenState extends State<BillMainScreen> {
             ),
             Expanded(
               child: _fullBillsList.length == 0
-                  ? Center(child: Text("EMPTY"))
+                  ? noDataContainer(
+                      title: "No Transactions yet!",
+                      message: "Click on the 'Add Bill' button to create one.",
+                      imgName: "undraw_empty",
+                    )
                   : Column(
                       children: [
                         _getHeadingRow(),
@@ -499,7 +518,7 @@ class _BillMainScreenState extends State<BillMainScreen> {
                       // Payment Type.
                       sizingInfo.isDesktop
                           ? getFlexContainer(
-                              "paymentType",
+                              "${reqList[counter].paymentType}",
                               2,
                               color: CustomColors.lightGrey,
                             )
@@ -588,6 +607,9 @@ class _BillMainScreenState extends State<BillMainScreen> {
     List<BillItem> reqBillItemsList = await _getBillItemsList(bill.invoiceDate);
 
     return PdfFunctions(
+      paymentType: bill.paymentType,
+      companyName: personalDoc["companyName"],
+      companyPhoneNo: personalDoc["phoneNo"],
       billItemsList: reqBillItemsList ?? [],
       invoiceNo: int.parse(bill.invoiceNo),
       invoiceDate: formatter.format(
