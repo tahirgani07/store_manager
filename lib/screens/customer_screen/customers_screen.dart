@@ -171,6 +171,21 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   Widget getListView(BuildContext context, String uid, List<Customer> reqList,
       SizingInformation sizingInfo) {
+    if (_customersList.isEmpty)
+      return noDataContainer(
+        title: "No Customers",
+        message: sizingInfo.isDesktop
+            ? "Add customers by clicking the 'Add a Customer' button"
+            : "Add a customer by clicking the floating plus button",
+        imgName: "undraw_empty",
+      );
+
+    if (reqList.isEmpty)
+      return noDataContainer(
+        title: "No Customers Found",
+        imgName: "undraw_no_data",
+      );
+
     return CupertinoScrollbar(
       thickness: 5,
       isAlwaysShown: true,

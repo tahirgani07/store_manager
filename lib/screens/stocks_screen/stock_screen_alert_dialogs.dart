@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
 import 'package:store_manager/models/stocks_model/stock_trans_model.dart';
 import 'package:store_manager/models/unit_model.dart';
@@ -7,7 +8,8 @@ import 'package:store_manager/screens/utils/loading_screen.dart';
 import 'package:store_manager/screens/utils/theme.dart';
 
 //---------------------ADD NEW ITEM-----------------------
-Future<void> showAddItemDialog(BuildContext context, String uid,
+Future<void> showAddItemDialog(
+    BuildContext context, String uid, SizingInformation sizingInfo,
     {String name = ""}) async {
   String unitDropDown = "BAGS";
   bool loading = false;
@@ -97,6 +99,7 @@ Future<void> showAddItemDialog(BuildContext context, String uid,
             ),
             actions: <Widget>[
               alertActionButton(
+                sizingInfo: sizingInfo,
                 context: context,
                 title: "Add Item",
                 color: Theme.of(context).primaryColor,
@@ -114,7 +117,7 @@ Future<void> showAddItemDialog(BuildContext context, String uid,
                   Navigator.of(context).pop();
                 },
               ),
-              alertActionButton(context: context),
+              alertActionButton(context: context, sizingInfo: sizingInfo),
             ],
           );
         },
@@ -124,8 +127,8 @@ Future<void> showAddItemDialog(BuildContext context, String uid,
 }
 
 //---------------------STOCK DETAILS-----------------------
-Future<void> showStockDetailsDialog(
-    BuildContext context, String uid, Items item) async {
+Future<void> showStockDetailsDialog(BuildContext context, String uid,
+    Items item, SizingInformation sizingInfo) async {
   return showDialog<void>(
     context: context,
     //barrierDismissible: false, // user must tap button!
@@ -159,32 +162,45 @@ Future<void> showStockDetailsDialog(
         ),
         actions: <Widget>[
           alertActionButton(
+            sizingInfo: sizingInfo,
             context: context,
             title: "Add Stock",
             color: Colors.green,
             onPressed: () {
               Navigator.of(context).pop();
-              updateStockDialog(context, uid, item, StockTransType.add);
+              updateStockDialog(
+                  context, uid, item, StockTransType.add, sizingInfo);
             },
           ),
           alertActionButton(
+            sizingInfo: sizingInfo,
             context: context,
             title: "Reduce Stock",
             color: Colors.yellow,
             onPressed: () {
               Navigator.of(context).pop();
-              updateStockDialog(context, uid, item, StockTransType.reduce);
+              updateStockDialog(
+                context,
+                uid,
+                item,
+                StockTransType.reduce,
+                sizingInfo,
+              );
             },
           ),
           alertActionButton(
+            sizingInfo: sizingInfo,
             context: context,
             title: "Get Barcode",
             color: Colors.yellow,
             onPressed: () {
-              getQrQuantityDialog(context, uid, item);
+              getQrQuantityDialog(context, uid, item, sizingInfo);
             },
           ),
-          alertActionButton(context: context),
+          alertActionButton(
+            context: context,
+            sizingInfo: sizingInfo,
+          ),
         ],
       );
     },
@@ -192,7 +208,12 @@ Future<void> showStockDetailsDialog(
 }
 
 //-----------------Get Qr Quantity Dailog--------------------------
-Future<void> getQrQuantityDialog(BuildContext context, String uid, Items item) {
+Future<void> getQrQuantityDialog(
+  BuildContext context,
+  String uid,
+  Items item,
+  SizingInformation sizingInfo,
+) {
   TextEditingController controller = TextEditingController();
   bool showError = false;
   return showDialog(
@@ -221,6 +242,7 @@ Future<void> getQrQuantityDialog(BuildContext context, String uid, Items item) {
         ),
         actions: [
           alertActionButton(
+              sizingInfo: sizingInfo,
               context: context,
               color: Colors.blue,
               title: "Get Barcode",
@@ -246,8 +268,8 @@ Future<void> getQrQuantityDialog(BuildContext context, String uid, Items item) {
 }
 
 //---------------------------ADD STOCK-----------------------------
-Future<void> updateStockDialog(
-    BuildContext context, String uid, Items item, StockTransType type) async {
+Future<void> updateStockDialog(BuildContext context, String uid, Items item,
+    StockTransType type, SizingInformation sizingInfo) async {
   TextEditingController updateStockVal = TextEditingController();
   bool loading = false;
   return showDialog<void>(
@@ -275,6 +297,7 @@ Future<void> updateStockDialog(
             ),
             actions: <Widget>[
               alertActionButton(
+                sizingInfo: sizingInfo,
                 context: context,
                 title:
                     type == StockTransType.add ? "Add Stock" : "Reduce Stock",
@@ -292,7 +315,10 @@ Future<void> updateStockDialog(
                   Navigator.of(context).pop();
                 },
               ),
-              alertActionButton(context: context),
+              alertActionButton(
+                context: context,
+                sizingInfo: sizingInfo,
+              ),
             ],
           );
         },

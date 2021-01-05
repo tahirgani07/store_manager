@@ -71,8 +71,9 @@ class _StockTransListState extends State<StockTransList> {
                     children: [
                       _getHeaderRow(),
                       (_searchController.text.isNotEmpty)
-                          ? _getStockTransList(context, _searchList)
-                          : _getStockTransList(context, _stockTransList),
+                          ? _getStockTransList(context, _searchList, sizingInfo)
+                          : _getStockTransList(
+                              context, _stockTransList, sizingInfo),
                     ],
                   ),
                 ),
@@ -113,7 +114,25 @@ class _StockTransListState extends State<StockTransList> {
     });
   }
 
-  Widget _getStockTransList(BuildContext context, List<StockTrans> transList) {
+  Widget _getStockTransList(BuildContext context, List<StockTrans> transList,
+      SizingInformation sizingInfo) {
+    if (_stockTransList.isEmpty)
+      return Expanded(
+        child: noDataContainer(
+          title: "No Stock Transactions",
+          message: "When you Add or Subtract stock it gets added to this list.",
+          imgName: "undraw_empty",
+        ),
+      );
+
+    if (transList.isEmpty)
+      return Expanded(
+        child: noDataContainer(
+          title: "No Transaction Found",
+          imgName: "undraw_no_data",
+        ),
+      );
+
     return Expanded(
       child: CupertinoScrollbar(
         controller: _scrollController,

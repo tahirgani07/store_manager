@@ -57,7 +57,8 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
                   addSomethingButton(
                     context: context,
                     text: "Add an Item",
-                    onPressed: () => showAddItemDialog(context, uid),
+                    onPressed: () =>
+                        showAddItemDialog(context, uid, sizingInfo),
                   ),
                 ],
               ),
@@ -78,8 +79,10 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
                       _headerRow(),
                       Expanded(
                         child: _searchController.text.isNotEmpty
-                            ? _getDataRows(context, uid, _searchList)
-                            : _getDataRows(context, uid, _itemsList),
+                            ? _getDataRows(
+                                context, uid, _searchList, sizingInfo)
+                            : _getDataRows(
+                                context, uid, _itemsList, sizingInfo),
                       ),
                     ],
                   ),
@@ -167,13 +170,27 @@ class _StockItemsDataTableState extends State<StockItemsDataTable> {
     );
   }
 
-  Widget _getDataRows(BuildContext context, String uid, List<Items> reqList) {
-    // onSelectChanged: (b) =>
-    //     showStockDetailsDialog(context, uid, item),
+  Widget _getDataRows(BuildContext context, String uid, List<Items> reqList,
+      SizingInformation sizingInfo) {
+    if (_itemsList.isEmpty)
+      return noDataContainer(
+        title: "No Customers",
+        message: sizingInfo.isDesktop
+            ? "Add a new Item by clicking the 'Add an Item' button"
+            : "Add a new Item by clicking the floating plus button",
+        imgName: "undraw_empty",
+      );
+
+    if (reqList.isEmpty)
+      return noDataContainer(
+        title: "No Item Found",
+        imgName: "undraw_no_data",
+      );
     List<dynamic> temp = [];
     temp = reqList
         .map((item) => InkWell(
-              onTap: () => showStockDetailsDialog(context, uid, item),
+              onTap: () =>
+                  showStockDetailsDialog(context, uid, item, sizingInfo),
               child: Row(
                 children: [
                   getFlexContainer("${item.name}", 3),

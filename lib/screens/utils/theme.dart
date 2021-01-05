@@ -100,12 +100,18 @@ Widget addSomethingButton(
 
 Widget alertActionButton({
   @required BuildContext context,
+  @required SizingInformation sizingInfo,
   String title,
   Color color,
   Function onPressed,
 }) {
+  if (!sizingInfo.isDesktop && !sizingInfo.isTablet && title == null)
+    return SizedBox();
+
   return RaisedButton(
-    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+    padding: sizingInfo.isDesktop
+        ? EdgeInsets.symmetric(horizontal: 30, vertical: 15)
+        : EdgeInsets.symmetric(horizontal: 5, vertical: 3),
     color: color ?? Colors.red,
     child: Text(title ?? "Close"),
     onPressed: onPressed ?? () => Navigator.of(context).pop(),

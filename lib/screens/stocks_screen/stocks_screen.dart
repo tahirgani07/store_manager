@@ -74,7 +74,7 @@ class _StocksScreenState extends State<StocksScreen> {
               widgetMob: FloatingActionButton(
                 tooltip: "Add a New Item",
                 child: Text("+", style: CustomTextStyle.bigIcons),
-                onPressed: () => showAddItemDialog(context, uid),
+                onPressed: () => showAddItemDialog(context, uid, sizingInfo),
               ),
             ),
             ///////////////////////// APP BAR
@@ -88,7 +88,7 @@ class _StocksScreenState extends State<StocksScreen> {
                           onPressed: () => locator<NavigationService>()
                               .navigateTo(StockTransRoute, false),
                           child: Text(
-                            "View Stock Transactions",
+                            "Transactions",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,

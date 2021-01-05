@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
 import 'package:store_manager/models/unit_model.dart';
 import 'package:store_manager/screens/utils/CustomTextStyle.dart';
@@ -70,13 +71,16 @@ class _DropDownTextFieldState extends State<UnitDropDownTextField> {
           showDialog(
               context: context,
               builder: (context) {
-                return AlertDialog(
-                  title: Text("Error"),
-                  content: Text("Select a Unit from the DropDown"),
-                  actions: [
-                    alertActionButton(context: context),
-                  ],
-                );
+                return ResponsiveBuilder(builder: (context, sizingInfo) {
+                  return AlertDialog(
+                    title: Text("Error"),
+                    content: Text("Select a Unit from the DropDown"),
+                    actions: [
+                      alertActionButton(
+                          context: context, sizingInfo: sizingInfo),
+                    ],
+                  );
+                });
               });
           searchUnitController.clear();
         } else if (!inUnitList) {

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:store_manager/models/bills_model/bill_model.dart';
 import 'package:store_manager/models/bills_model/offline_bill_items_model.dart';
 import 'package:store_manager/models/stocks_model/stock_items_model.dart';
@@ -194,20 +195,27 @@ class _DropDownTextFieldState extends State<BillItemNameDropDownTextField> {
   }
 
   Widget _addNewItemListTile() {
-    return Container(
-      height: (height + 10),
-      child: ListTile(
-        title: RaisedButton(
-            child: Text("Add New Item"),
-            color: Colors.blue,
-            textColor: Colors.white,
-            onPressed: () {
-              showAddItemDialog(context, uid, name: nameController.text);
-              nameController.clear();
-              focusNode.unfocus();
-            }),
-      ),
-    );
+    return ResponsiveBuilder(builder: (context, sizingInfo) {
+      return Container(
+        height: (height + 10),
+        child: ListTile(
+          title: RaisedButton(
+              child: Text("Add New Item"),
+              color: Colors.blue,
+              textColor: Colors.white,
+              onPressed: () {
+                showAddItemDialog(
+                  context,
+                  uid,
+                  sizingInfo,
+                  name: nameController.text,
+                );
+                nameController.clear();
+                focusNode.unfocus();
+              }),
+        ),
+      );
+    });
   }
 
   _onSearchTextChanged(String text) {

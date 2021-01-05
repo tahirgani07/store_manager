@@ -341,18 +341,19 @@ class _BillMainScreenState extends State<BillMainScreen> {
       child: Material(
         color: Colors.white,
         elevation: 8.0,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("TRANSACTIONS", style: CustomTextStyle.blue_bold_reg),
-                  SizedBox(height: 15),
-                  ResponsiveBuilder(
-                    builder: (context, sizingInfo) {
-                      return Row(
+        child: ResponsiveBuilder(
+          builder: (context, sizingInfo) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("TRANSACTIONS",
+                          style: CustomTextStyle.blue_bold_reg),
+                      SizedBox(height: 15),
+                      Row(
                         children: [
                           Flexible(
                             flex: 1,
@@ -371,31 +372,33 @@ class _BillMainScreenState extends State<BillMainScreen> {
                                 )
                               : SizedBox(),
                         ],
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: _fullBillsList.length == 0
-                  ? noDataContainer(
-                      title: "No Transactions yet!",
-                      message: "Click on the 'Add Bill' button to create one.",
-                      imgName: "undraw_empty",
-                    )
-                  : Column(
-                      children: [
-                        _getHeadingRow(),
-                        Expanded(
-                          child: (searchController.text.isEmpty)
-                              ? _getList(_datedBillsList)
-                              : _getList(_searchList),
+                ),
+                Expanded(
+                  child: _fullBillsList.length == 0
+                      ? noDataContainer(
+                          title: "No Transactions yet!",
+                          message: sizingInfo.isDesktop
+                              ? "Click on the 'Add Bill' button to create one."
+                              : "",
+                          imgName: "undraw_empty",
+                        )
+                      : Column(
+                          children: [
+                            _getHeadingRow(),
+                            Expanded(
+                              child: (searchController.text.isEmpty)
+                                  ? _getList(_datedBillsList)
+                                  : _getList(_searchList),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -464,7 +467,11 @@ class _BillMainScreenState extends State<BillMainScreen> {
   _getList(List<Bill> reqList) {
     bool noData = reqList.length == 0;
     return noData
-        ? Center(child: Text("NO DATA"))
+        ? noDataContainer(
+            title: "No Data Found",
+            imgName: "undraw_no_data",
+            topForText: 130,
+          )
         : ListView.builder(
             itemCount: reqList.length,
             itemBuilder: (context, counter) {

@@ -675,48 +675,51 @@ class _AddBillScreenState extends State<AddBillScreen> {
     return showDialog(
       context: context,
       builder: (context) => StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          title: Text("Enter Item Id"),
-          content: SingleChildScrollView(
-            child: Container(
-              width: 500,
-              child: Column(
-                children: [
-                  showError
-                      ? Text(
-                          "This Field Cannot be empty",
-                          style: TextStyle(color: Colors.red),
-                        )
-                      : SizedBox(),
-                  customTextField(
-                    controller: controller,
-                    autofocus: true,
-                  ),
-                ],
+        return ResponsiveBuilder(builder: (context, sizingInfo) {
+          return AlertDialog(
+            title: Text("Enter Item Id"),
+            content: SingleChildScrollView(
+              child: Container(
+                width: 500,
+                child: Column(
+                  children: [
+                    showError
+                        ? Text(
+                            "This Field Cannot be empty",
+                            style: TextStyle(color: Colors.red),
+                          )
+                        : SizedBox(),
+                    customTextField(
+                      controller: controller,
+                      autofocus: true,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          actions: [
-            alertActionButton(
-                context: context,
-                color: Colors.blue,
-                title: "Add",
-                onPressed: () {
-                  if (controller.text.isEmpty) {
-                    setState(() {
+            actions: [
+              alertActionButton(
+                  sizingInfo: sizingInfo,
+                  context: context,
+                  color: Colors.blue,
+                  title: "Add",
+                  onPressed: () {
+                    if (controller.text.isEmpty) {
+                      setState(() {
+                        showError = true;
+                      });
+                      return;
+                    }
+                    bool success = _addItemRowFromItemId(controller.text);
+                    if (!success) {
                       showError = true;
-                    });
-                    return;
-                  }
-                  bool success = _addItemRowFromItemId(controller.text);
-                  if (!success) {
-                    showError = true;
-                    return;
-                  }
-                  Navigator.pop(context);
-                }),
-          ],
-        );
+                      return;
+                    }
+                    Navigator.pop(context);
+                  }),
+            ],
+          );
+        });
       }),
     );
   }
