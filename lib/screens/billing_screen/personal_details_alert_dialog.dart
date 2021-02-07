@@ -79,7 +79,7 @@ Future<void> showPersonalDetailsAlertDialog(
 
                     DatabaseService databaseService = DatabaseService();
                     try {
-                      await databaseService.getRefToUsersDocument(uid).update({
+                      await databaseService.getRefToUsersDocument(uid).set({
                         "firstName": firstNameCont.text,
                         "lastName": lastNameCont.text,
                         "companyName": companyNameCont.text,
