@@ -1,4 +1,4 @@
-# store_manager
+# Store Manager
 
 This Store Manager, will help small stores to manage their inventory, bills and invoices.
 The user can add products, generate barcode for the products, generate bills as pdf, add 
